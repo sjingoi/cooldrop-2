@@ -20,7 +20,9 @@ export interface PeerInfo {
     uuid: string,
 }
 
-type SDPEvent = CustomEvent<{ sdp: RTCSessionDescription }>;
+export interface SDPEvent extends Event {
+    readonly sdp: SDP,
+}
 
 
 export abstract class PeerConnection extends EventTarget {
@@ -64,7 +66,7 @@ export abstract class PeerConnection extends EventTarget {
 
     protected onSDP() {
         if (this.rtc_connection.localDescription !== null) {
-            let sdpEvent: SDPEvent = new CustomEvent("sdp", { detail: { sdp: this.rtc_connection.localDescription } } )
+            let sdpEvent: SDPEvent = new 
             this.dispatchEvent(sdpEvent);
         } else {
             console.log("Could not send local connection as it is null.");

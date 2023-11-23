@@ -14,6 +14,12 @@ export interface PeerInfo {
     peer_name: string;
 }
 
+export interface SDP {
+    origin_uuid: string;
+    recipient_uuid: string;
+    sdp: string;
+}
+
 export enum MessageType {
     TEST = "test",
     PRIVATE_UUID = "private-uuid",
@@ -34,6 +40,7 @@ export class ServerConnection {
         this.socket = new WebSocket("ws://" + url);
         this.socket.addEventListener("message", (event) => {
             let message: ServerMessage = JSON.parse(event.data.toString());
+            console.log("Recieved " + message.type);
             this.notifyListeners(message);
         })
     }
@@ -49,7 +56,6 @@ export class ServerConnection {
     }
 
     public addMessageListener(type: MessageType, listener: (data: string) => any) {
-        console.log("Recieved " + type);
         this.listeners.add([type, listener]);
     }
 

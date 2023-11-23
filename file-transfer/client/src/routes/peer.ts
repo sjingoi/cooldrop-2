@@ -20,5 +20,13 @@ export class Peer {
         this.connection = new LocalPeerConnection();
 
     }
+
+    public getUUID() {
+        return this.uuid;
+    }
+
+    public getName() {
+        return this.name;
+    }
     
 }
