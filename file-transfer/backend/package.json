@@ -1,0 +1,11 @@
+{
+  "devDependencies": {
+    "@types/ws": "^8.5.9",
+    "typescript": "^5.2.2"
+  },
+  "dependencies": {
+    "http": "^0.0.1-security",
+    "uuidv4": "^6.2.13",
+    "ws": "^8.14.2"
+  }
+}
