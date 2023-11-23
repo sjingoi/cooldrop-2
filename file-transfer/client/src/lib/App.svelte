@@ -41,9 +41,11 @@
 
         serverconnection.addMessageListener(MessageType.SDP_OFFER_REQ, (data) => {
             let peerInfo: PeerInfo = JSON.parse(data);
-            let peer: Peer = new Peer(peerInfo.name, peerInfo.uuid);
-            peer.connection.addEventListener("open", (event) => console.log("OPENED"));
+            let connection = new LocalPeerConnection();
+            let peer: Peer = new Peer(peerInfo.name, peerInfo.uuid, connection);
+            peer.connection.addEventListener("open", (event) => console.log("OPENED")); // Race condition
             peer.connection.addEventListener("close", (event) => console.log("CLOSED"));
+            peer.connection.addEventListener("message", (event) => {})
             peer.connection.addEventListener("sdp", (event) => {
                 let sdp_offer: SDP = {
                     origin_uuid: public_uuid,
@@ -53,6 +55,10 @@
                 serverconnection.send()
             })
             peers = [ ...peers, peer ];
+
+            serverconnection.addMessageListener(MessageType.SDP_ANSWER, (data) => {
+                peer.connection
+            })
         });
 
         serverconnection.addMessageListener(MessageType.SDP_OFFER, (data) => {
