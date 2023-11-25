@@ -20,7 +20,7 @@ class Logger {
 
     public logVerbose(message: string) {
         if (this.verbose) {
-            this.logInfo(message);
+            console.log("[Debug] " + message)
         }
     }
 

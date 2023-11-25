@@ -15,7 +15,7 @@ class Logger {
     }
     logVerbose(message) {
         if (this.verbose) {
-            this.logInfo(message);
+            console.log("[Debug] " + message);
         }
     }
 }

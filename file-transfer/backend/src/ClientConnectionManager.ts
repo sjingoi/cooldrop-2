@@ -1,6 +1,6 @@
 import ClientConnection from "./ClientConnection";
 import Logger from "./Logger";
-import { MessageType, PeerInfo, SDP } from "./ServerMessage";
+import { MessageType, PeerInfo, SDP } from "./Types";
 
 class ClientConnectionManager {
     
@@ -17,17 +17,18 @@ class ClientConnectionManager {
     }
 
     public registerClient(new_client: ClientConnection) {
+        Logger.getIns().logVerbose("Added Client " + new_client.getSessionUUID() + " to array.")
         let new_client_info: PeerInfo = {
             peer_name: new_client.getName(),
             peer_uuid: new_client.getSessionUUID(),
         }
+
+        new_client.addMessageListener(MessageType.SDP_OFFER, (data) => this.forwardSDP(JSON.parse(data), new_client, MessageType.SDP_OFFER))
+        new_client.addMessageListener(MessageType.SDP_ANSWER, (data) => this.forwardSDP(JSON.parse(data), new_client, MessageType.SDP_ANSWER))
+
         for (let client of this.client_list) client.send(MessageType.SDP_OFFER_REQ, JSON.stringify(new_client_info));
 
         this.client_list.push(new_client);
-        
-        new_client.addMessageListener(MessageType.SDP_OFFER, (data) => this.forwardSDP(JSON.parse(data), new_client, MessageType.SDP_OFFER))
-        new_client.addMessageListener(MessageType.SDP_ANSWER, (data) => this.forwardSDP(JSON.parse(data), new_client, MessageType.SDP_ANSWER))
-        
     }
 
     public unRegisterClient(client: ClientConnection) {
@@ -43,6 +44,7 @@ class ClientConnectionManager {
     }
 
     private forwardSDP(sdp: SDP, origin_client: ClientConnection, sdp_type: MessageType) {
+        Logger.getIns().logVerbose("Forwarding SDP");
         if (sdp.origin_uuid != origin_client.getSessionUUID()) {
             Logger.getIns().logError("UUID Mismatch: " + sdp.origin_uuid + " vs " + origin_client.getSessionUUID());
             return;
@@ -50,7 +52,9 @@ class ClientConnectionManager {
 
         let recipient = this.getClient(sdp.recipient_uuid);
         if (recipient) {
-            recipient.send(MessageType.SDP_OFFER, JSON.stringify(sdp));
+            recipient.send(sdp_type, JSON.stringify(sdp));
+        } else {
+            Logger.getIns().logError("Could not find recipient " + sdp.recipient_uuid);
         }
     }
 }

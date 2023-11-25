@@ -1,5 +1,5 @@
 import Logger from "./Logger";
-import { ServerMessage, MessageType, SDP } from "./ServerMessage";
+import { ServerMessage, MessageType, SDP } from "./Types";
 import WebSocket = require("ws");
 
 export class Connection {
@@ -16,7 +16,7 @@ export class Connection {
     }
 
     private notifyListeners(message: ServerMessage) {
-        Logger.getIns().logInfo("Recieved message " + message.type);
+        Logger.getIns().logInfo("Recieved message: " + message.type);
         this.listeners.forEach( (pair) => {
             const type: MessageType = pair[0];
             const x: (data: string) => any = pair[1];
@@ -44,7 +44,7 @@ export class Connection {
             data: data,
         }
         this.socket?.send(JSON.stringify(message));
-        Logger.getIns().logInfo("Sending " + type + ": " + data)
+        Logger.getIns().logInfo("Sending " + type );
     }
 
     

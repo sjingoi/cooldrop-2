@@ -12,7 +12,7 @@ class Connection {
         });
     }
     notifyListeners(message) {
-        Logger_1.default.getIns().logInfo("Recieved message " + message.type);
+        Logger_1.default.getIns().logInfo("Recieved message: " + message.type);
         this.listeners.forEach((pair) => {
             const type = pair[0];
             const x = pair[1];
@@ -37,7 +37,7 @@ class Connection {
             data: data,
         };
         (_a = this.socket) === null || _a === void 0 ? void 0 : _a.send(JSON.stringify(message));
-        Logger_1.default.getIns().logInfo("Sending " + type + ": " + data);
+        Logger_1.default.getIns().logInfo("Sending " + type);
     }
 }
 exports.Connection = Connection;

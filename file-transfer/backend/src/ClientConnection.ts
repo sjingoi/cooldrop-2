@@ -1,4 +1,4 @@
-import { ServerMessage, MessageType, SDP } from "./ServerMessage";
+import { ServerMessage, MessageType, SDP } from "./Types";
 import { Connection } from "./Connection"
 import WebSocket = require("ws");
 const { v4: uuidv4 } = require('uuid');

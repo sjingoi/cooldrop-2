@@ -1,7 +1,7 @@
 import ClientConnection from "./ClientConnection";
 import ClientConnectionManager from "./ClientConnectionManager";
 import WebSocket = require("ws");
-import { ServerMessage, MessageType, SDP, PeerInfo } from "./ServerMessage";
+import { ServerMessage, MessageType, SDP, PeerInfo } from "./Types";
 import { Connection } from "./Connection";
 import Logger from "./Logger";
 const { v4: uuidv4 } = require('uuid');

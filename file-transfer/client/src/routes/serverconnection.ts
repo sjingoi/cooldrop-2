@@ -16,6 +16,7 @@ export interface PeerInfo {
 
 export interface SDP {
     origin_uuid: string;
+    origin_name: string | null;
     recipient_uuid: string;
     sdp: string;
 }

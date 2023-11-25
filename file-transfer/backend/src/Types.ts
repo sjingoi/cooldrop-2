@@ -5,6 +5,7 @@ export interface ServerMessage {
 
 export interface SDP {
     origin_uuid: string;
+    origin_name: string;
     recipient_uuid: string;
     sdp: string;
 }
@@ -23,5 +24,3 @@ export enum MessageType {
     SDP_ANSWER = "sdp-answer",
     SDP_OFFER_REQ = "sdp-offer-req",
 }
-
-
