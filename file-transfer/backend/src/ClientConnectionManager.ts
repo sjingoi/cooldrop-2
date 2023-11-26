@@ -1,6 +1,6 @@
 import ClientConnection from "./ClientConnection";
 import Logger from "./Logger";
-import { MessageType, PeerInfo, SDP } from "./Types";
+import { IceCandidate, MessageType, PeerInfo, RTCMessageType as RTCMessageType, RTCType, SDP } from "./Types";
 
 class ClientConnectionManager {
     
@@ -23,8 +23,10 @@ class ClientConnectionManager {
             peer_uuid: new_client.getSessionUUID(),
         }
 
-        new_client.addMessageListener(MessageType.SDP_OFFER, (data) => this.forwardSDP(JSON.parse(data), new_client, MessageType.SDP_OFFER))
-        new_client.addMessageListener(MessageType.SDP_ANSWER, (data) => this.forwardSDP(JSON.parse(data), new_client, MessageType.SDP_ANSWER))
+        new_client.addMessageListener(MessageType.SDP_OFFER, (data) => this.forwardMessage(JSON.parse(data), new_client, MessageType.SDP_OFFER));
+        new_client.addMessageListener(MessageType.SDP_ANSWER, (data) => this.forwardMessage(JSON.parse(data), new_client, MessageType.SDP_ANSWER));
+        new_client.addMessageListener(MessageType.ICE_CANDIDATE, (data) => this.forwardMessage(JSON.parse(data), new_client, MessageType.ICE_CANDIDATE));
+        
 
         for (let client of this.client_list) client.send(MessageType.SDP_OFFER_REQ, JSON.stringify(new_client_info));
 
@@ -43,18 +45,18 @@ class ClientConnectionManager {
         return this.client_list.find(predicate);
     }
 
-    private forwardSDP(sdp: SDP, origin_client: ClientConnection, sdp_type: MessageType) {
-        Logger.getIns().logVerbose("Forwarding SDP");
-        if (sdp.origin_uuid != origin_client.getSessionUUID()) {
-            Logger.getIns().logError("UUID Mismatch: " + sdp.origin_uuid + " vs " + origin_client.getSessionUUID());
+    private forwardMessage(data: RTCType, origin_client: ClientConnection, message_type: RTCMessageType) {
+        Logger.getIns().logVerbose("Forwarding " + message_type);
+        if (data.origin_uuid != origin_client.getSessionUUID()) {
+            Logger.getIns().logError("UUID Mismatch: " + data.origin_uuid + " vs " + origin_client.getSessionUUID());
             return;
         }
 
-        let recipient = this.getClient(sdp.recipient_uuid);
+        let recipient = this.getClient(data.recipient_uuid);
         if (recipient) {
-            recipient.send(sdp_type, JSON.stringify(sdp));
+            recipient.send(message_type, JSON.stringify(data));
         } else {
-            Logger.getIns().logError("Could not find recipient " + sdp.recipient_uuid);
+            Logger.getIns().logError("Could not find recipient " + data.recipient_uuid);
         }
     }
 }

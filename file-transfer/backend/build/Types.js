@@ -10,4 +10,5 @@ var MessageType;
     MessageType["SDP_OFFER"] = "sdp-offer";
     MessageType["SDP_ANSWER"] = "sdp-answer";
     MessageType["SDP_OFFER_REQ"] = "sdp-offer-req";
+    MessageType["ICE_CANDIDATE"] = "ice-candidate";
 })(MessageType = exports.MessageType || (exports.MessageType = {}));

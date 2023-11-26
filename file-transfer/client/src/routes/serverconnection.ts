@@ -1,27 +1,9 @@
 export interface ServerMessage {
-    type: MessageType;
+    type: ServerMessageType;
     data: string;
 }
 
-export interface SDP {
-    origin_uuid: string;
-    recipient_uuid: string;
-    sdp: string;
-}
-
-export interface PeerInfo {
-    peer_uuid: string;
-    peer_name: string;
-}
-
-export interface SDP {
-    origin_uuid: string;
-    origin_name: string | null;
-    recipient_uuid: string;
-    sdp: string;
-}
-
-export enum MessageType {
+export enum ServerMessageType {
     TEST = "test",
     PRIVATE_UUID = "private-uuid",
     PUBLIC_UUID = "public-uuid",
@@ -29,13 +11,13 @@ export enum MessageType {
     SDP_OFFER = "sdp-offer",
     SDP_ANSWER = "sdp-answer",
     SDP_OFFER_REQ = "sdp-offer-req",
+    ICE_CANDIDATE = "ice-candidate",
 }
-
 
 export class ServerConnection {
 
     public socket: WebSocket | null = null;
-    private listeners: Set<[MessageType, (data: string) => any]> = new Set();
+    private listeners: Set<[ServerMessageType, (data: string) => any]> = new Set();
 
     public constructor(url: string) {
         this.socket = new WebSocket("ws://" + url);
@@ -48,7 +30,7 @@ export class ServerConnection {
 
     private notifyListeners(message: ServerMessage) {
         this.listeners.forEach( (pair) => {
-            const type: MessageType = pair[0];
+            const type: ServerMessageType = pair[0];
             const x: (data: string) => any = pair[1];
             if (type === message.type) {
                 x(message.data);
@@ -56,11 +38,11 @@ export class ServerConnection {
         })
     }
 
-    public addMessageListener(type: MessageType, listener: (data: string) => any) {
+    public addMessageListener(type: ServerMessageType, listener: (data: string) => any) {
         this.listeners.add([type, listener]);
     }
 
-    public send(type: MessageType, data: string) {
+    public send(type: ServerMessageType, data: string) {
         console.log("Sending " + type);
         let message: ServerMessage = {
             type: type,

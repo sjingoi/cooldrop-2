@@ -3,93 +3,77 @@
     import InfoPanel from "./InfoPanel.svelte";
     import PeersArea from "./PeersArea.svelte";
     import { v4 as uuidv4 } from 'uuid';
-
-    import { ServerConnection } from "../routes/serverconnection";
-    import { type ServerMessage, MessageType, type SDP } from "../routes/serverconnection";
-    import { LocalPeerConnection, RemotePeerConnection, type PeerInfo, PeerConnectionEvents } from "../routes/peerconnection";
-    import { Peer } from "../routes/peer";
     import { onMount } from "svelte";
 
-    let uuid: string;
-    let session_uuid: string = "";
-    let name: string;
-    let peers: Peer[] = [];
+    import { ServerMessageType, ServerConnection } from "../routes/serverconnection";
+    import { LocalPeerConnection, PeerConnection, PeerConnectionEvents, RemotePeerConnection } from "../routes/peerconnection";
+    import { Peer } from "../routes/peer";
+    import type { IceCandidate, PeerInfo, SDP, SDPEvent } from "../routes/types";
+    import { UserInfo } from "../routes/userinfo";
+    
     
     onMount(() => {
 
-        name = localStorage.getItem("name") || "";
-        uuid = localStorage.getItem("uuid") || "";
+        UserInfo.name = localStorage.getItem("name") || "";
+        UserInfo.private_uuid = localStorage.getItem("uuid") || "";
         
-        if (uuid === "") {
-            uuid = uuidv4();
-            localStorage.setItem("uuid", uuid);
+        if (UserInfo.private_uuid === "") {
+            UserInfo.private_uuid = uuidv4();
+            localStorage.setItem("uuid", UserInfo.private_uuid);
         }
 
-        const serverconnection: ServerConnection = new ServerConnection("localhost:8080");
+        const serverconnection: ServerConnection = new ServerConnection("192.168.0.46:8080");
 
-        serverconnection.addMessageListener(MessageType.PUBLIC_UUID, (data) => {
-            session_uuid = data;
+        serverconnection.addMessageListener(ServerMessageType.PUBLIC_UUID, (data) => {
+            UserInfo.session_uuid = data;
         });
 
-        serverconnection.addMessageListener(MessageType.PRIVATE_UUID_REQ, (data) => {
+        serverconnection.addMessageListener(ServerMessageType.PRIVATE_UUID_REQ, (data) => {
             let info: PeerInfo = {
-                peer_uuid: session_uuid,
-                peer_name: name,
+                peer_uuid: UserInfo.session_uuid,
+                peer_name: UserInfo.name,
             }
-            serverconnection.send(MessageType.PRIVATE_UUID, JSON.stringify(info));
+            serverconnection.send(ServerMessageType.PRIVATE_UUID, JSON.stringify(info));
         });
 
-        serverconnection.addMessageListener(MessageType.SDP_OFFER_REQ, (data) => {
+        serverconnection.addMessageListener(ServerMessageType.SDP_OFFER_REQ, (data) => {
             console.log("Creating new peer");
             let peerInfo: PeerInfo = JSON.parse(data);
-            let connection = new LocalPeerConnection();
-            connection.addEventListener(PeerConnectionEvents.SDP, (event) => {
-                let sdp_event = event as SDPEvent;
-                let sdp_offer: SDP = {
-                    origin_uuid: session_uuid,
-                    origin_name: name,
-                    recipient_uuid: peerInfo.peer_uuid,
-                    sdp: sdp_event.detail.sdp
-                }
-                serverconnection.send(MessageType.SDP_OFFER, JSON.stringify(sdp_offer));
-            })
-            connection.addEventListener(PeerConnectionEvents.OPEN, (event) => console.log("OPENED")); // Race condition
-            connection.addEventListener(PeerConnectionEvents.CLOSE, (event) => console.log("CLOSED"));
-
-            let peer: Peer = new Peer(peerInfo.peer_name, peerInfo.peer_uuid, connection);
-            peers = [ ...peers, peer ];
+            let peer = new LocalPeerConnection(peerInfo.peer_uuid, peerInfo.peer_name, serverconnection);
+            UserInfo.peers = [ ...UserInfo.peers, peer ];
 
             
         });
 
-        serverconnection.addMessageListener(MessageType.SDP_OFFER, (data) => {
+        serverconnection.addMessageListener(ServerMessageType.SDP_OFFER, (data) => {
             let sdp_offer: SDP = JSON.parse(data);
-            let connection = new RemotePeerConnection(sdp_offer.sdp);
-            connection.addEventListener(PeerConnectionEvents.SDP, (event) => {
-                let sdp_event = event as SDPEvent;
-                let sdp_answer: SDP = {
-                    origin_uuid: session_uuid,
-                    origin_name: name,
-                    recipient_uuid: sdp_offer.origin_uuid,
-                    sdp: sdp_event.detail.sdp,
-                }
-                serverconnection.send(MessageType.SDP_ANSWER, JSON.stringify(sdp_answer));
-            })
-            let peer: Peer = new Peer(sdp_offer.origin_name, sdp_offer.origin_uuid, connection);
-            peers = [ ...peers, peer];
+            let peer = new RemotePeerConnection(sdp_offer.origin_uuid, sdp_offer.origin_name, serverconnection, sdp_offer.sdp);
+            UserInfo.peers = [ ...UserInfo.peers, peer];
 
         });
 
-        serverconnection.addMessageListener(MessageType.SDP_ANSWER, (data) => {
+        serverconnection.addMessageListener(ServerMessageType.SDP_ANSWER, (data) => {
             let sdp_answer: SDP = JSON.parse(data);
-            const predicate = (peer: Peer) => { return peer.getUUID() == sdp_answer.origin_uuid; }
-            let peer_connection = peers.find(predicate);
+            const predicate = (peer: PeerConnection) => { return peer.getUUID() == sdp_answer.origin_uuid; }
+            let peer_connection = UserInfo.peers.find(predicate);
             if (peer_connection) {
-                peer_connection.connection.setRemote(sdp_answer.sdp);
+                peer_connection.setRemote(sdp_answer.sdp);
             } else {
                 console.error("Could not find peer " + (sdp_answer.origin_uuid));
             }
-        })
+        });
+
+        serverconnection.addMessageListener(ServerMessageType.ICE_CANDIDATE, (data) => {
+            console.log("Adding ice");
+            let candidate: IceCandidate = JSON.parse(data);
+            const predicate = (peer: PeerConnection) => { return peer.getUUID() == candidate.origin_uuid; }
+            let peer_connection = UserInfo.peers.find(predicate);
+            if (peer_connection) {
+                peer_connection.addIceCandidate(candidate.ice);
+            } else {
+                console.error("Could not find peer " + (candidate.origin_uuid));
+            }
+        });
 
         return () => {
             serverconnection.close();
@@ -98,5 +82,5 @@
     })
 
 </script>
-<InfoPanel name={name} public_uuid={session_uuid}/>
+<InfoPanel name={UserInfo.name} public_uuid={UserInfo.session_uuid}/>
 <PeersArea />

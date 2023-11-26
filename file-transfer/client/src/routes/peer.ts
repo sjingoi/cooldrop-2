@@ -5,17 +5,15 @@ export enum ConnectionType {
     REMOTE = "remote",
 }
 
-export class Peer {
+export class Peer extends EventTarget {
 
     private name: string | null;
     private uuid: string;
-    public connection: PeerConnection;
     
-    constructor(name: string | null, uuid: string, connection: PeerConnection) {
-
+    constructor(uuid: string, name: string | null) {
+        super();
         this.name = name;
         this.uuid = uuid;
-        this.connection = connection;
 
     }
 
@@ -25,6 +23,10 @@ export class Peer {
 
     public getName() {
         return this.name;
+    }
+
+    public setName(name: string) {
+        this.name = name;
     }
     
 }

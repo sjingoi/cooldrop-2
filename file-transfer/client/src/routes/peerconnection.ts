@@ -1,31 +1,10 @@
-import type { SDP } from "./serverconnection";
+import { Peer } from "./peer";
+import { ServerMessageType, type ServerConnection } from "./serverconnection";
+import { get, type Writable } from "svelte/store";
+import { UserInfo } from "./userinfo";
+import type { IceCandidate, SDP } from "./types";
 
-const SERVERS = {
-    iceServers:[
-        {
-            urls:["stun:stun1.l.google.com:19302", "stun:stun1.l.google.com:19302", "stun:stun2.l.google.com:19302"],
-        }
-    ]
-}
-
-// interface PeerConnectionEventMap {
-//     "open": Event,
-//     "close": Event,
-//     "message": MessageEvent,
-//     "sdp": SDPEvent,
-// }
-
-export interface PeerInfo {
-    peer_name: string,
-    peer_uuid: string,
-}
-
-// interface PeerConnectionEventTarget extends EventTarget { 
-//     addEventListener<K extends keyof PeerConnectionEventMap>(type: K, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
-//     addEventListener(type: string, callback: EventListenerOrEventListenerObject | null, options?: EventListenerOptions | boolean): void;
-// }
-
-// const typedEventTarget = EventTarget as {new(): PeerConnectionEventTarget; prototype: PeerConnectionEventTarget};
+const SERVERS = { iceServers: [ { urls:["stun:stun1.l.google.com:19302"], } ] }
 
 export enum PeerConnectionEvents {
     OPEN = "open",
@@ -34,22 +13,27 @@ export enum PeerConnectionEvents {
     SDP = "sdp",
 }
 
-export abstract class PeerConnection extends EventTarget { //extends typedEventTarget {
+export abstract class PeerConnection extends Peer { //extends typedEventTarget {
 
     protected rtc_connection: RTCPeerConnection;
     protected rtc_datachannel?: RTCDataChannel;
+    protected server_connection: ServerConnection;
 
-    constructor() {
-        super();
+    constructor(uuid: string, name: string | null, server_connection: ServerConnection) {
+        super(uuid, name);
+        this.server_connection = server_connection;
         this.rtc_connection = new RTCPeerConnection(SERVERS);
         this.rtc_connection.addEventListener("icecandidate", (ice_event) => this.onIce(ice_event));
-        console.log("CREATED PEER CONNECTION");
     }
 
     public setRemote(remote_offer: string) {
         console.log("Setting remote description");
-        console.log(remote_offer);
         this.rtc_connection.setRemoteDescription(JSON.parse(remote_offer));
+    }
+
+    public addIceCandidate(ice_candidate: string) {
+        console.log("Adding ice candidate");
+        this.rtc_connection.addIceCandidate(JSON.parse(ice_candidate));
     }
 
     protected setDatachannelHandlers() {
@@ -63,59 +47,82 @@ export abstract class PeerConnection extends EventTarget { //extends typedEventT
     }
 
     protected onOpen(event: Event) {
+        console.log("OPENED")
         this.dispatchEvent(new CustomEvent("open"));
     }
 
     protected onClose(event: Event) {
+        console.log("CLOSED")
         this.dispatchEvent(new CustomEvent("close"));
     }
 
     protected onMessage(message: MessageEvent) {
+        console.log("MESSAGE")
         this.dispatchEvent(new CustomEvent("message", { detail: message.data }));
     }
 
     protected onIce(event: RTCPeerConnectionIceEvent) {
-        if (event.candidate === null) {
-            this.onSDP();
+
+        if (event.candidate === null) return;
+
+        let ice_candidate: IceCandidate = {
+            origin_uuid: UserInfo.session_uuid,
+            recipient_uuid: this.getUUID(),
+            ice: JSON.stringify(event.candidate),
         }
+        this.server_connection.send(ServerMessageType.ICE_CANDIDATE, JSON.stringify(ice_candidate));
+        
     }
 
-    protected onSDP() {
-        if (this.rtc_connection.localDescription !== null) {
-            let sdpEvent: Event = new CustomEvent(PeerConnectionEvents.SDP, { detail: { sdp: JSON.stringify(this.rtc_connection.localDescription) } });
-            this.dispatchEvent(sdpEvent);
-        } else {
-            console.log("Could not send local connection as it is null.");
-        }
-    }
+    protected onSDP(sdp: RTCSessionDescriptionInit) {
 
-    
+        if (sdp === null) {
+            console.log("SDP is null.");
+            return;
+        }
+        this.rtc_connection.setLocalDescription(sdp)
+        
+        let sdp_offer: SDP = {
+            origin_uuid: UserInfo.session_uuid,
+            origin_name: UserInfo.private_uuid,
+            recipient_uuid: this.getUUID(),
+            sdp: JSON.stringify(sdp),
+        }
+
+        if (sdp.type == "offer") {
+            this.server_connection.send(ServerMessageType.SDP_OFFER, JSON.stringify(sdp_offer));
+        } else if (sdp.type == "answer") {
+            this.server_connection.send(ServerMessageType.SDP_ANSWER, JSON.stringify(sdp_offer));
+        }
+
+        let sdpEvent: Event = new CustomEvent(PeerConnectionEvents.SDP, { detail: { sdp: JSON.stringify(this.rtc_connection.localDescription) } });
+        this.dispatchEvent(sdpEvent);
+
+    }
 
 }
 
 export class LocalPeerConnection extends PeerConnection {
-    constructor() {
-        super();
+    constructor(uuid: string, name: string | null, server_connection: ServerConnection) {
+        super(uuid, name, server_connection);
         this.rtc_datachannel = this.rtc_connection.createDataChannel("channel");
         this.setDatachannelHandlers();
-        this.rtc_connection.createOffer().then((sdp) => this.rtc_connection.setLocalDescription(sdp));
-        
+        this.rtc_connection.createOffer().then((sdp) => this.onSDP(sdp));
     }
 }
 
 export class RemotePeerConnection extends PeerConnection {
-    constructor(remote_offer: string) {
-        super();
+    constructor(uuid: string, name: string | null, server_connection: ServerConnection, remote_offer: string) {
+        super(uuid, name, server_connection);
         this.rtc_connection.setRemoteDescription(JSON.parse(remote_offer))
         this.rtc_connection.ondatachannel = (event) => {
             this.rtc_datachannel = event.channel;
             this.setDatachannelHandlers();
         }
-        this.rtc_connection.createAnswer().then((sdp) => this.onAnswer(sdp));
+        this.rtc_connection.createAnswer().then((sdp) => this.onSDP(sdp));
     }
 
-    private onAnswer(answer: RTCSessionDescriptionInit) {
-        this.rtc_connection.setLocalDescription(answer);
-        super.onSDP();
-    }
+    // private onAnswer(answer: RTCSessionDescriptionInit) {
+    //     this.onSDP(answer);
+    // }
 }

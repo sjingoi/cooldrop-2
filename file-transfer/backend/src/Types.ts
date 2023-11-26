@@ -10,10 +10,18 @@ export interface SDP {
     sdp: string;
 }
 
+export interface IceCandidate {
+    origin_uuid: string;
+    recipient_uuid: string;
+    ice: string;
+}
+
 export interface PeerInfo {
     peer_uuid: string;
     peer_name: string;
 }
+
+export type RTCType = IceCandidate | SDP;
 
 export enum MessageType {
     TEST = "test",
@@ -23,4 +31,7 @@ export enum MessageType {
     SDP_OFFER = "sdp-offer",
     SDP_ANSWER = "sdp-answer",
     SDP_OFFER_REQ = "sdp-offer-req",
+    ICE_CANDIDATE = "ice-candidate",
 }
+
+export type RTCMessageType = MessageType.ICE_CANDIDATE | MessageType.SDP_OFFER | MessageType.SDP_ANSWER;
