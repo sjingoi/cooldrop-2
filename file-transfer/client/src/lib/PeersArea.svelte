@@ -1,18 +1,10 @@
-<script>
+<script lang="ts">
     import Peer from "$lib/Peer.svelte";
+    import type { PeerConnection } from "./peerconnection";
     /**
      * @type {Array<any>}
      */
-    let peers = [
-        {
-            name: "John",
-            uuid: "1234"
-        },
-        {
-            name: "Jane",
-            uuid: "5678"
-        }
-    ];
+    export let peers: PeerConnection[];
 </script>
 
 <div>

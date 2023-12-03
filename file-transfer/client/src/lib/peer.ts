@@ -7,8 +7,8 @@ export enum ConnectionType {
 
 export class Peer extends EventTarget {
 
-    private name: string | null;
-    private uuid: string;
+    public name: string | null;
+    public uuid: string;
     
     constructor(uuid: string, name: string | null) {
         super();

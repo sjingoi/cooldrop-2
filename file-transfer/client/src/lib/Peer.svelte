@@ -1,12 +1,6 @@
-<script>
-    /**
-     * @type {string}
-     */
-     export let name;
-    /**
-     * @type {string}
-     */
-     export let uuid;
+<script lang="ts">
+     export let name: string | null;
+     export let uuid: string | null;
 </script>
 
 <div>
