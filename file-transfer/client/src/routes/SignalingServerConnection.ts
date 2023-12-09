@@ -3,6 +3,8 @@ import { ServerMessageType, ServerConnection } from "./serverconnection";
 import type { IceCandidate, PeerInfo, SDP } from "../lib/types";
 import { UserInfo } from "../lib/userinfo";
 import { v4 as uuidv4 } from 'uuid';
+import { peers as peers_store } from "../stores/stores"
+import { get } from "svelte/store";
 
 export class SignalingServerConnection extends ServerConnection {
 
@@ -32,20 +34,22 @@ export class SignalingServerConnection extends ServerConnection {
             console.log("Creating new peer");
             let peerInfo: PeerInfo = JSON.parse(data);
             let peer = new LocalPeerConnection(peerInfo.peer_uuid, peerInfo.peer_name, this);
-            UserInfo.peers = [ ...UserInfo.peers, peer ];
+            peers_store.update(peers => ( [ ... peers, peer ]))
+            // UserInfo.peers = [ ...UserInfo.peers, peer ];
         });
     
         this.addMessageListener(ServerMessageType.SDP_OFFER, (data) => {
             let sdp_offer: SDP = JSON.parse(data);
             let peer = new RemotePeerConnection(sdp_offer.origin_uuid, sdp_offer.origin_name, this, sdp_offer.sdp);
-            UserInfo.peers = [ ...UserInfo.peers, peer];
+            peers_store.update(peers => ( [ ... peers, peer ]));
+            // UserInfo.peers = [ ...UserInfo.peers, peer];
     
         });
     
         this.addMessageListener(ServerMessageType.SDP_ANSWER, (data) => {
             let sdp_answer: SDP = JSON.parse(data);
             const predicate = (peer: PeerConnection) => { return peer.getUUID() == sdp_answer.origin_uuid; }
-            let peer_connection = UserInfo.peers.find(predicate);
+            let peer_connection = get(peers_store)//= UserInfo.peers.find(predicate);
             if (peer_connection) {
                 peer_connection.setRemote(sdp_answer.sdp);
             } else {

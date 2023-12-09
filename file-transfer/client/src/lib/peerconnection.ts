@@ -3,6 +3,7 @@ import { ServerMessageType, type ServerConnection } from "../routes/serverconnec
 import { get, type Writable } from "svelte/store";
 import { UserInfo } from "./userinfo";
 import type { IceCandidate, SDP } from "./types";
+import { session_uuid } from "../stores/stores";
 
 const SERVERS = { iceServers: [ { urls:["stun:stun1.l.google.com:19302"], } ] }
 

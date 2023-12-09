@@ -11,6 +11,8 @@
     import type { IceCandidate, PeerInfo, SDP, SDPEvent } from "../lib/types";
     import { UserInfo } from "../lib/userinfo";
     import { setupServerEventHandlers } from "./serverevents";
+
+    import { session_uuid, peers } from "../stores/stores";
     
     
     onMount(() => {
@@ -34,5 +36,5 @@
     })
 
 </script>
-<InfoPanel name={UserInfo.name} public_uuid={UserInfo.session_uuid}/>
-<PeersArea peers={UserInfo.peers}/>
+<InfoPanel name={UserInfo.name} public_uuid={$session_uuid}/>
+<PeersArea peers={$peers}/>

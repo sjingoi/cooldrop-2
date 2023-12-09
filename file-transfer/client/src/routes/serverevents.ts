@@ -2,11 +2,13 @@ import { LocalPeerConnection, PeerConnection, RemotePeerConnection } from "../li
 import { ServerMessageType, type ServerConnection } from "./serverconnection";
 import type { IceCandidate, PeerInfo, SDP } from "../lib/types";
 import { UserInfo } from "../lib/userinfo";
+import { session_uuid as session_uuid_store } from "../stores/stores";
 
 export function setupServerEventHandlers(serverconnection: ServerConnection) {
     
     serverconnection.addMessageListener(ServerMessageType.PUBLIC_UUID, (data) => {
         UserInfo.session_uuid = data;
+        session_uuid_store.set(data);
     });
 
     serverconnection.addMessageListener(ServerMessageType.PRIVATE_UUID_REQ, (data) => {
