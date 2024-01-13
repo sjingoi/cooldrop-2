@@ -1,6 +1,6 @@
 <script lang="ts">
     import Peer from "$lib/Peer.svelte";
-    import type { PeerConnection } from "./peerconnection";
+    import type { PeerConnection } from "./PeerConnection";
     /**
      * @type {Array<any>}
      */

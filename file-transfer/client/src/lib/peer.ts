@@ -1,5 +1,3 @@
-import type { PeerConnection } from "./peerconnection";
-
 export enum ConnectionType {
     LOCAL = "local",
     REMOTE = "remote",

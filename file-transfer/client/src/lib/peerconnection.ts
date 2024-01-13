@@ -1,5 +1,5 @@
-import { Peer } from "./peer";
-import { ServerMessageType, type ServerConnection } from "../routes/serverconnection";
+import { Peer } from "$lib/Peer";
+import { ServerMessageType, type ServerConnection } from "../routes/ServerConnection";
 import { get, type Writable } from "svelte/store";
 import { UserInfo } from "./userinfo";
 import type { IceCandidate, SDP } from "./types";
