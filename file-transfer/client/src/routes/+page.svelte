@@ -78,6 +78,12 @@
 
         return () => {
             serverconnection.close();
+            peers.update(peers => {
+                peers.forEach(peer => {
+                    //close connection
+                })
+                return [];
+            })
         };
 
     })
