@@ -6,7 +6,7 @@
     import { onMount } from "svelte";
 
     import { ServerMessageType, ServerConnection } from "./ServerConnection";
-    import { LocalPeerConnection, PeerConnection, RemotePeerConnection } from "$lib/PeerConnection";
+    import { PeerConnection } from "$lib/PeerConnection";
     import type { IceCandidate, PeerInfo, SDP, SDPEvent } from "$lib/types";
     import { UserInfo } from "$lib/userinfo";
     
@@ -43,13 +43,13 @@
         serverconnection.addMessageListener(ServerMessageType.SDP_OFFER_REQ, (data) => {
             console.log("Creating new peer");
             let peerInfo: PeerInfo = JSON.parse(data);
-            let peer = new LocalPeerConnection(peerInfo.peer_uuid, peerInfo.peer_name, serverconnection);
+            let peer = new PeerConnection(peerInfo.peer_uuid, peerInfo.peer_name, serverconnection);
             peers.update(list => [ ...list, peer ]);
         });
 
         serverconnection.addMessageListener(ServerMessageType.SDP_OFFER, (data) => {
             let sdp_offer: SDP = JSON.parse(data);
-            let peer = new RemotePeerConnection(sdp_offer.origin_uuid, sdp_offer.origin_name, serverconnection, sdp_offer.sdp);
+            let peer = new PeerConnection(sdp_offer.origin_uuid, sdp_offer.origin_name, serverconnection, sdp_offer.sdp);
             peers.update(list => [ ...list, peer ]);
         });
 

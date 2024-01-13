@@ -1,4 +1,4 @@
-import type { Peer } from "./Peer";
+import type { Peer } from "./peer";
 import type { PeerConnection } from "./PeerConnection";
 
 export class UserInfo {

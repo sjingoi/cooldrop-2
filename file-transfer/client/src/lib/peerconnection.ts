@@ -14,19 +14,40 @@ export enum PeerConnectionEvents {
     SDP = "sdp",
 }
 
-export abstract class PeerConnection extends Peer { //extends typedEventTarget {
+export class PeerConnection extends Peer { //extends typedEventTarget {
 
     protected rtc_connection: RTCPeerConnection;
     protected rtc_datachannel?: RTCDataChannel;
     protected server_connection: ServerConnection;
     public connected: boolean;
 
-    constructor(uuid: string, name: string | null, server_connection: ServerConnection) {
+    constructor(uuid: string, name: string | null, server_connection: ServerConnection, remote_offer?: string) {
         super(uuid, name);
         this.server_connection = server_connection;
         this.rtc_connection = new RTCPeerConnection(SERVERS);
         this.rtc_connection.addEventListener("icecandidate", (ice_event) => this.onIce(ice_event));
         this.connected = false;
+
+        if (remote_offer) {
+            this.construct_remote(remote_offer)
+        } else {
+            this.construct_local();
+        }
+    }
+
+    private construct_remote(remote_offer: string) {
+        this.rtc_connection.setRemoteDescription(JSON.parse(remote_offer))
+            this.rtc_connection.ondatachannel = (event) => {
+                this.rtc_datachannel = event.channel;
+                this.setDatachannelHandlers();
+            }
+        this.rtc_connection.createAnswer().then((sdp) => this.onSDP(sdp));
+    }
+
+    private construct_local() {
+        this.rtc_datachannel = this.rtc_connection.createDataChannel("channel");
+        this.setDatachannelHandlers();
+        this.rtc_connection.createOffer().then((sdp) => this.onSDP(sdp));
     }
 
     public setRemote(remote_offer: string) {
@@ -107,27 +128,27 @@ export abstract class PeerConnection extends Peer { //extends typedEventTarget {
 
 }
 
-export class LocalPeerConnection extends PeerConnection {
-    constructor(uuid: string, name: string | null, server_connection: ServerConnection) {
-        super(uuid, name, server_connection);
-        this.rtc_datachannel = this.rtc_connection.createDataChannel("channel");
-        this.setDatachannelHandlers();
-        this.rtc_connection.createOffer().then((sdp) => this.onSDP(sdp));
-    }
-}
+// export class LocalPeerConnection extends PeerConnection {
+//     constructor(uuid: string, name: string | null, server_connection: ServerConnection) {
+//         super(uuid, name, server_connection);
+//         this.rtc_datachannel = this.rtc_connection.createDataChannel("channel");
+//         this.setDatachannelHandlers();
+//         this.rtc_connection.createOffer().then((sdp) => this.onSDP(sdp));
+//     }
+// }
 
-export class RemotePeerConnection extends PeerConnection {
-    constructor(uuid: string, name: string | null, server_connection: ServerConnection, remote_offer: string) {
-        super(uuid, name, server_connection);
-        this.rtc_connection.setRemoteDescription(JSON.parse(remote_offer))
-        this.rtc_connection.ondatachannel = (event) => {
-            this.rtc_datachannel = event.channel;
-            this.setDatachannelHandlers();
-        }
-        this.rtc_connection.createAnswer().then((sdp) => this.onSDP(sdp));
-    }
+// export class RemotePeerConnection extends PeerConnection {
+//     constructor(uuid: string, name: string | null, server_connection: ServerConnection, remote_offer: string) {
+//         super(uuid, name, server_connection);
+//         this.rtc_connection.setRemoteDescription(JSON.parse(remote_offer))
+//         this.rtc_connection.ondatachannel = (event) => {
+//             this.rtc_datachannel = event.channel;
+//             this.setDatachannelHandlers();
+//         }
+//         this.rtc_connection.createAnswer().then((sdp) => this.onSDP(sdp));
+//     }
 
-    // private onAnswer(answer: RTCSessionDescriptionInit) {
-    //     this.onSDP(answer);
-    // }
-}
+//     // private onAnswer(answer: RTCSessionDescriptionInit) {
+//     //     this.onSDP(answer);
+//     // }
+// }
