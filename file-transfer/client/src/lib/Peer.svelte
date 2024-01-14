@@ -1,18 +1,16 @@
 <script lang="ts">
     import type { FormEventHandler } from "svelte/elements";
-    import type { PeerConnection } from "./PeerConnection";
+    import type { FilePeerConnection, PeerConnection } from "./PeerConnection";
 
-    export let peer: PeerConnection;
+    export let peer: FilePeerConnection;
 
     let files: FileList;
 
     $: if (files) {
         console.log(files);
+        peer.sendFile(files[0]);
     }
 
-    function handleFile(event: any) {
-        console.log(event.name);
-    }
 </script>
 
 <div>
