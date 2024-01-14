@@ -9,4 +9,56 @@
 	<body data-sveltekit-preload-data="hover">
 		<div style="display: contents">%sveltekit.body%</div>
 	</body>
+	<style>
+		@font-face {
+			font-family: D-DIN-Exp;
+			src: url(fonts/D-DINExp.woff2) format("woff2");
+			font-style: normal;
+			font-weight: 400;
+			font-display: block
+		}
+
+		@font-face {
+			font-family: D-DIN-Bold;
+			src: url(fonts/D-DIN-Bold.woff2) format("woff2");
+			font-style: normal;
+			font-weight: 400;
+			font-display: block
+		}
+
+		@font-face {
+			font-family: D-DIN-Regular;
+			src: url(fonts/D-DIN.woff2) format("woff2");
+			font-style: normal;
+			font-weight: 400;
+			font-display: block
+		}
+
+		body {
+			color: var(--main-text-color);
+			background-color: var(--main-bg-color);
+			font-family:D-DIN-Regular;
+			margin: 0;
+			padding: 0;
+			height: 100%;
+		}
+
+		:root {
+			--main-bg-color: #ffffff;
+			--main-text-color: #000000;
+			--nav-bg-color: #eeeeeec0;
+			--nav-border-color: #dddddd;
+		}
+
+
+
+		@media (prefers-color-scheme: dark) {
+			:root {
+				--main-bg-color: #000000;
+				--main-text-color: #ffffff;
+				--nav-bg-color: #1c1c1eC0;
+				--nav-border-color: #38393A;
+			}
+		}	
+	</style>
 </html>
