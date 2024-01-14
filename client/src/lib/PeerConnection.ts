@@ -1,5 +1,5 @@
 import { Peer } from "$lib/Peer";
-import { ServerMessageType, type ServerConnection } from "../routes/ServerConnection";
+import { ServerMessageType, type ServerConnection } from "../routes/ft/ServerConnection";
 import { UserInfo } from "./userinfo";
 import type { IceCandidate, SDP } from "./types";
 import { FileData, type FileHeader } from "./File";

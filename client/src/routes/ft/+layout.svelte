@@ -1,10 +1,8 @@
 <nav class="topbar">
-    <a class="app-title" href="/">Sebastian Jingoi</a>
+    <a class="app-title" href="/">Cooldrop</a>
     <div class="links">
-        <a href="/about">About</a>
-        <a href="/contact">Posts</a>
-        <a href="/contact">Videos</a>
-        <a href="/contact">Projects</a>
+        <a href="/seb">Home</a>
+        <a href="https://github.com/sjingoi/cooldrop-2">Github</a>
         <a href="mailto:sebi.jingoi@gmail.com">Contact</a>
     </div>
 </nav>

@@ -32,6 +32,11 @@
         border-style: solid;
         border-color: var(--nav-border-color);
         border-radius: 8px;
+        transition: 100ms;
+    }
+
+    .container:hover {
+        background-color: var(--nav-bg-color-hover);
     }
 
     .thumbnail {

@@ -1,5 +1,9 @@
 <script>
     import ProjectPreview from "$lib/ProjectPreview.svelte";
+    import mallapp from "./mallapp.png"
+    import cooldrop1 from "./cooldrop1.png"
+    import webrtclogo from "./webrtclogo.png"
+    import gptbot from "./gptbot.png"
 </script>
 
 <div class="hero">
@@ -14,13 +18,14 @@
     </div>
     <div class="projects">
         <div class="project-row">
-            <ProjectPreview name="Cooldrop File Transfer" description="Cool WebRTC File Transfer App" url="/" image="https://via.placeholder.com/300x200" />
-            <ProjectPreview name="Mall Android App" description="Academic Group Project" url="/" image="https://via.placeholder.com/300x200" />
+            <ProjectPreview name="Cooldrop File Transfer" description="Cool WebRTC Based File Transfer App" url="https://github.com/sjingoi/cooldrop" image={cooldrop1} />
+            <ProjectPreview name="Mall Android App" description="Academic Group Project" url="https://github.com/sjingoi/B07Group7Project" image={mallapp} />
         </div>
         <div class="project-row">
-            <ProjectPreview name="Manual WebRTC Signaler" description="Simple app to test WebRTC" url="/" image="https://via.placeholder.com/300x200" />
-            <ProjectPreview name="GPTBot" description="Discord Chat Bot using GPT API" url="/" image="https://via.placeholder.com/300x200" />
+            <ProjectPreview name="Manual WebRTC Signaler" description="Simple app to test WebRTC" url="/" image={webrtclogo} />
+            <ProjectPreview name="GPTBot" description="Discord Chat Bot using GPT API" url="/" image={gptbot} />
         </div>
+        <a class="see-more" href="https://github.com/sjingoi/">See more on Github →</a>
     </div>
 </div>
 
@@ -75,7 +80,6 @@
         justify-content: space-between;
         margin: 0;
         padding: 5% 5% 100% 5%;
-        background-image: url($lib/content.png);
         background-size: cover;
         background-position: center;
         background-blend-mode: multiply;
@@ -84,14 +88,25 @@
 
     .projects {
         display: flex;
-        flex-direction: row;
+        flex-direction: column;
         gap: 16px;
     }
 
     .project-row {
         display: flex;
-        flex-direction: column;
+        flex-direction: row;
         gap: 16px;
+    }
+
+    .see-more {
+        color: var(--sub-text-color);
+        text-align: center;
+        text-decoration: none;
+        transition: 100ms;
+    }
+
+    .see-more:hover {
+        color: var(--main-text-color);
     }
 
 </style>
