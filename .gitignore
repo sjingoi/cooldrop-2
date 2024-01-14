@@ -1,7 +1,7 @@
 .DS_Store
 node_modules
-/file-transfer/backend/build
-/file-transfer/client/.svelte-kit
+backend/build
+client/.svelte-kit
 /package
 .env
 .env.*
