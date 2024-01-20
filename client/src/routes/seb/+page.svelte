@@ -7,14 +7,16 @@
 </script>
 
 <div class="hero">
-    <h1>Welcome to CoolDrop</h1>
-    <p>Here you can find all the cool stuff I've created or worked on.</p>
+    <div class="hero-content">
+        <h1>Welcome to CoolDrop</h1>
+        <p>Here you can find all the cool stuff I've created or worked on.</p>
+    </div>
 </div>
 
 <div class="content">
-    <div>
+    <div style="padding-bottom: 5%;">
         <h2>Projects</h2>
-        <p>Here you can find all the cool stuff I've created or worked on.</p>
+        <p style="text-align: left">Both personal and academic projects.</p>
     </div>
     <div class="projects">
         <div class="project-row">
@@ -62,10 +64,14 @@
 
     .hero h1 {
         color: white;
+        padding-left: 5%;
+        padding-right: 5%;
     }
 
     .hero p {
         color: white;
+        padding-left: 5%;
+        padding-right: 5%;
     }
 
     @media (prefers-color-scheme: dark) {
@@ -108,5 +114,60 @@
     .see-more:hover {
         color: var(--main-text-color);
     }
+
+    @media (max-width: 1280px) {
+        .content {
+            flex-direction: column;
+        }
+        
+        .projects {
+            width: fit-content;
+        }
+    }
+
+
+
+    @media (max-width: 900px) {
+
+        .project-row {
+            flex-direction: column;
+        }
+
+        .content {
+            flex-direction: column;
+        }
+
+        .hero h1 {
+            font-size: 42px;
+        }
+
+
+    }
+
+    @media (max-width: 720px) {
+        .hero {
+            background-image: url("./seb-galaxy1.jpg");
+            height: 50vh;
+            display: flex;
+            flex-direction: row;
+            align-content: center;
+            align-items: center;
+        }
+
+        .hero-content {
+            width: 100%;
+            align-items: center;
+        }
+        .projects {
+            width: auto;
+        }
+
+    }
+
+    @media (max-width: 500px) {
+        
+    }
+
+
 
 </style>
