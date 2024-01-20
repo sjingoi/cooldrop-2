@@ -26,7 +26,7 @@
         display: flex;
         flex-direction: row;
         justify-content: left;
-        gap: 1rem;
+        gap: 16px;
         background-color: var(--nav-bg-color);
         border: 2px;
         border-style: solid;
@@ -55,6 +55,7 @@
         .container {
             width: 100%;
             height: 75px;
+            gap: 8px;
         }
 
         .thumbnail {

@@ -1,29 +1,74 @@
+<script>
+    let links_height = "0";
+    let links_visibility = "hidden"
+    let links_opacity = "0%"
+
+    let links = [{ title: "Cooldrop", link: "/ft"}, 
+                 { title: "About", link: "/about"},
+                 { title: "Github", link: "https://github.com/sjingoi/"}, 
+                 { title: "Contact", link: "mailto:sebi.jingoi@gmail.com"}, 
+                ]
+
+    const toggle_ham = () => {
+        if (links_visibility === "hidden") {
+            links_height = "calc(100vh - 48px)"
+            links_visibility = "visible"
+            links_opacity = "100%"
+        } else {
+            links_height = "0"
+            links_visibility = "hidden"
+            links_opacity = "0%"
+        }
+    }
+</script>
+
 <nav class="topbar">
-    <a class="app-title" href="/">Sebastian Jingoi</a>
+    <a class="app-title" href="/seb">Sebastian Jingoi</a>
     <div class="links">
-        <a href="/ft">Cooldrop</a>
-        <a href="/about">About</a>
-        <a href="https://github.com/sjingoi/">Github</a>
-        <a href="mailto:sebi.jingoi@gmail.com">Contact</a>
+        {#each links as entry} 
+            <a href={entry.link}>{entry.title}</a>
+        {/each}
     </div>
+    <button class="ham" on:click={toggle_ham}>≡</button>
 </nav>
+<div class="spacer"></div>
+<li class="links-list" 
+    style="visibility: {links_visibility}; height: {links_height}">
+    {#each links as entry} 
+        <a style="visibility: {links_visibility}; opacity: {links_opacity}" href={entry.link}>{entry.title}</a> 
+    {/each}
+</li>
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
 
 <style>
 
+    .spacer {
+        transition: 500ms;
+        height: 48px;
+    }
+
     .topbar {
-        position: sticky;
+        height: 48px;
+        width: 100%;
+        position: fixed;
         top: 0;
-        justify-content: space-between;
-        display: flex;
-        background-color: var(--nav-bg-color);
         padding: 12px;
-        border: 0;
+        box-sizing: border-box;
+
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        
+        background-color: var(--nav-bg-color);
+
+        border: 0px;
         border-bottom: 2px;
-        border-style: solid;
         border-color: var(--nav-border-color);
+        border-style: solid;
         backdrop-filter: blur(64px);
+        
+        transition: 300ms;
     }
 
     a {
@@ -42,6 +87,45 @@
     .links {
         display: flex;
         gap: 2rem;
+    }
+
+    .ham {
+        all: unset;
+        text-align: center;
+        font-size: 36px;
+        display: none;
+        width: 48px;
+        height: 48px;
+        margin-right: -8px;
+    }
+
+    .links-list {
+        position: fixed;
+        transition: 300ms;
+        background-color: var(--nav-bg-color);
+        backdrop-filter: blur(16px);
+        width: 100vw;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        padding: 24px;
+        box-sizing: border-box;
+        
+    }
+
+    .links-list a {
+        font-size: 24px;
+        transition: 300ms;
+    }
+
+    @media (max-width: 720px) {
+        .links {
+            display: none;
+        }
+
+        .ham {
+            display: inline;
+        }
     }
 </style>
 

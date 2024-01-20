@@ -8,7 +8,7 @@
 
 <div class="hero">
     <div class="hero-content">
-        <h1>Welcome to CoolDrop</h1>
+        <h1>Welcome to Cooldrop</h1>
         <p>Here you can find all the cool stuff I've created or worked on.</p>
     </div>
 </div>
@@ -24,8 +24,8 @@
             <ProjectPreview name="Mall Android App" description="Academic Group Project" url="https://github.com/sjingoi/B07Group7Project" image={mallapp} />
         </div>
         <div class="project-row">
-            <ProjectPreview name="Manual WebRTC Signaler" description="Simple app to test WebRTC" url="/" image={webrtclogo} />
-            <ProjectPreview name="GPTBot" description="Discord Chat Bot using GPT API" url="/" image={gptbot} />
+            <ProjectPreview name="Manual WebRTC Signaler" description="Simple app to test WebRTC" url="https://github.com/sjingoi/webrtc-tester" image={webrtclogo} />
+            <ProjectPreview name="GPTBot" description="Discord Chat Bot using GPT API" url="https://github.com/sjingoi/ai-discord-bot" image={gptbot} />
         </div>
         <a class="see-more" href="https://github.com/sjingoi/">See more on Github →</a>
     </div>
@@ -85,7 +85,7 @@
         flex-direction: row;
         justify-content: space-between;
         margin: 0;
-        padding: 5% 5% 100% 5%;
+        padding: 5% 5% 5% 5%;
         background-size: cover;
         background-position: center;
         background-blend-mode: multiply;
