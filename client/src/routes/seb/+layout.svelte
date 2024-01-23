@@ -1,7 +1,8 @@
 <script>
-    let links_height = "0";
+    let links_height = "0px";
     let links_visibility = "hidden"
     let links_opacity = "0%"
+    let padding = "0px"
 
     let links = [{ title: "Cooldrop", link: "/ft"}, 
                  { title: "About", link: "/about"},
@@ -14,10 +15,14 @@
             links_height = "calc(100vh - 48px)"
             links_visibility = "visible"
             links_opacity = "100%"
+            padding = "24px"
+            document.body.classList.add('no-scroll');
         } else {
-            links_height = "0"
+            links_height = "0px"
             links_visibility = "hidden"
             links_opacity = "0%"
+            padding = "0px"
+            document.body.classList.remove('no-scroll');
         }
     }
 </script>
@@ -33,7 +38,7 @@
 </nav>
 <div class="spacer"></div>
 <li class="links-list" 
-    style="visibility: {links_visibility}; height: {links_height}">
+    style="visibility: {links_visibility}; height: {links_height}; padding-top: {padding}; padding-bottom: {padding}">
     {#each links as entry} 
         <a style="visibility: {links_visibility}; opacity: {links_opacity}" href={entry.link}>{entry.title}</a> 
     {/each}
@@ -126,6 +131,11 @@
         .ham {
             display: inline;
         }
+    }
+
+    :global(.no-scroll) {
+        overflow: hidden;
+        width: 100vw;
     }
 </style>
 
