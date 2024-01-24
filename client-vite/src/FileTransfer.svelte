@@ -3,11 +3,11 @@
     import { v4 as uuidv4 } from 'uuid';
     import { onMount } from "svelte";
 
-    import { ServerMessageType, ServerConnection } from "./ServerConnection";
-    import { FilePeerConnection, PeerConnection } from "$lib/PeerConnection";
-    import type { IceCandidate, PeerInfo, SDP, SDPEvent } from "$lib/types";
+    import { ServerMessageType, ServerConnection } from "./lib/ServerConnection";
+    import { FilePeerConnection, PeerConnection } from "./lib/PeerConnection";
+    import type { IceCandidate, PeerInfo, SDP, SDPEvent } from "./lib/types";
 
-    import Peer from "$lib/Peer.svelte";
+    import Peer from "./lib/Peer.svelte";
     
     let display_name: string = "";
     let session_uuid: string = "";
