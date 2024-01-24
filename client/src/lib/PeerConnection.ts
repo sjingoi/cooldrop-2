@@ -1,6 +1,5 @@
 import { Peer } from "$lib/Peer";
 import { ServerMessageType, type ServerConnection } from "../routes/ft/ServerConnection";
-import { UserInfo } from "./userinfo";
 import type { IceCandidate, SDP } from "./types";
 import { FileData, type FileHeader } from "./File";
 
@@ -17,12 +16,16 @@ export class PeerConnection extends Peer { //extends typedEventTarget {
 
     protected rtc_connection: RTCPeerConnection;
     protected rtc_datachannel?: RTCDataChannel;
-    protected server_connection: ServerConnection;
+    protected signalling_server: ServerConnection;
+    protected display_name: string;
+    protected session_uuid: string;
     public connected: boolean;
 
-    constructor(uuid: string, name: string | null, server_connection: ServerConnection, remote_offer?: string) {
-        super(uuid, name);
-        this.server_connection = server_connection;
+    constructor(peer_uuid: string, peer_name: string | null, display_name: string, session_uuid: string, signalling_server: ServerConnection, remote_offer?: string) {
+        super(peer_uuid, peer_name);
+        this.display_name = display_name;
+        this.session_uuid = session_uuid;
+        this.signalling_server = signalling_server;
         this.rtc_connection = new RTCPeerConnection(SERVERS);
         this.rtc_connection.addEventListener("icecandidate", (ice_event) => this.onIce(ice_event));
         this.connected = false;
@@ -91,11 +94,11 @@ export class PeerConnection extends Peer { //extends typedEventTarget {
         if (event.candidate === null) return;
 
         let ice_candidate: IceCandidate = {
-            origin_uuid: UserInfo.session_uuid,
+            origin_uuid: this.session_uuid,
             recipient_uuid: this.getUUID(),
             ice: JSON.stringify(event.candidate),
         }
-        this.server_connection.send(ServerMessageType.ICE_CANDIDATE, JSON.stringify(ice_candidate));
+        this.signalling_server.send(ServerMessageType.ICE_CANDIDATE, JSON.stringify(ice_candidate));
         
     }
 
@@ -108,16 +111,16 @@ export class PeerConnection extends Peer { //extends typedEventTarget {
         this.rtc_connection.setLocalDescription(sdp)
         
         let sdp_offer: SDP = {
-            origin_uuid: UserInfo.session_uuid,
-            origin_name: UserInfo.name,
+            origin_uuid: this.session_uuid,
+            origin_name: this.display_name,
             recipient_uuid: this.getUUID(),
             sdp: JSON.stringify(sdp),
         }
 
         if (sdp.type == "offer") {
-            this.server_connection.send(ServerMessageType.SDP_OFFER, JSON.stringify(sdp_offer));
+            this.signalling_server.send(ServerMessageType.SDP_OFFER, JSON.stringify(sdp_offer));
         } else if (sdp.type == "answer") {
-            this.server_connection.send(ServerMessageType.SDP_ANSWER, JSON.stringify(sdp_offer));
+            this.signalling_server.send(ServerMessageType.SDP_ANSWER, JSON.stringify(sdp_offer));
         }
 
         let sdpEvent: Event = new CustomEvent(PeerConnectionEvents.SDP, { detail: { sdp: JSON.stringify(this.rtc_connection.localDescription) } });
@@ -134,8 +137,8 @@ export class FilePeerConnection extends PeerConnection {
     private chunk_size: number = 64*1024;
     private current_file: FileData | null = null;
 
-    constructor(uuid: string, name: string | null, server_connection: ServerConnection, remote_offer?: string) {
-        super(uuid, name, server_connection, remote_offer);
+    constructor(uuid: string, name: string | null, display_name: string, session_uuid: string, server_connection: ServerConnection, remote_offer?: string) {
+        super(uuid, name, display_name, session_uuid, server_connection, remote_offer);
         this.addEventListener("message", (e: Event) => {
             const customEvent  = e as CustomEvent;
             this.handleMessage(customEvent.detail);

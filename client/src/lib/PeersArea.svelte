@@ -1,15 +1,15 @@
 <script lang="ts">
     import Peer from "$lib/Peer.svelte";
-    import type { PeerConnection } from "./PeerConnection";
+    import type { FilePeerConnection } from "./PeerConnection";
     /**
      * @type {Array<any>}
      */
-    export let peers: PeerConnection[];
+    export let peers: FilePeerConnection[];
 </script>
 
 <div>
     {#each peers as peer}
-        <Peer name={peer.name} uuid={peer.uuid} />
+        <Peer peer={peer} />
     {/each}
 </div>
 
