@@ -4,12 +4,12 @@
     import { v4 as uuidv4 } from 'uuid';
     import { onMount } from "svelte";
 
-    import { ServerMessageType } from "./lib/ServerTypes";
-    import { FilePeerConnection, PeerConnection } from "./lib/PeerConnection";
-    import type { IceCandidate, PeerInfo, SDP, SDPEvent } from "./lib/types";
+    import { ServerMessageType } from "./lib-ft/ServerTypes";
+    import { FilePeerConnection, PeerConnection } from "./lib-ft/PeerConnection";
+    import type { IceCandidate, PeerInfo, SDP, SDPEvent } from "./lib-ft/types";
 
 
-    import Peer from "./lib/Peer.svelte";
+    import Peer from "./lib-ft/Peer.svelte";
     
     let display_name: string = "";
     let session_uuid: string = "";
@@ -29,7 +29,7 @@
         
         // const serverconnection: ServerConnection = new ServerConnection("localhost:8080");
         
-        const socket = io("localhost:8080");
+        const socket = io("192.168.0.60:8080");
         
         socket.on(ServerMessageType.PUBLIC_UUID, (data) => {
             session_uuid = data
