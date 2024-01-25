@@ -3,17 +3,11 @@ import Logger from "./Logger";
 import { IceCandidate, MessageType, PeerInfo, RTCMessageType as RTCMessageType, RTCType, SDP } from "./Types";
 
 class ClientConnectionManager {
+
+    protected client_list: ClientConnection[];
     
-    private constructor() {
+    constructor() {
         this.client_list = [];
-    }
-    
-    private static instance: ClientConnectionManager;
-    
-    private client_list: ClientConnection[];
-    
-    public static getInstance() {
-        return ClientConnectionManager.instance || (ClientConnectionManager.instance = new ClientConnectionManager());
     }
 
     public registerClient(new_client: ClientConnection) {
@@ -23,12 +17,14 @@ class ClientConnectionManager {
             peer_uuid: new_client.getSessionUUID(),
         }
 
-        new_client.addMessageListener(MessageType.SDP_OFFER, (data) => this.forwardMessage(JSON.parse(data), new_client, MessageType.SDP_OFFER));
-        new_client.addMessageListener(MessageType.SDP_ANSWER, (data) => this.forwardMessage(JSON.parse(data), new_client, MessageType.SDP_ANSWER));
-        new_client.addMessageListener(MessageType.ICE_CANDIDATE, (data) => this.forwardMessage(JSON.parse(data), new_client, MessageType.ICE_CANDIDATE));
+        new_client.socket.on(MessageType.SDP_OFFER, (data) => this.forwardMessage(JSON.parse(data), new_client, MessageType.SDP_OFFER));
+        new_client.socket.on(MessageType.SDP_ANSWER, (data) => this.forwardMessage(JSON.parse(data), new_client, MessageType.SDP_ANSWER));
+        new_client.socket.on(MessageType.ICE_CANDIDATE, (data) => this.forwardMessage(JSON.parse(data), new_client, MessageType.ICE_CANDIDATE));
         
 
-        for (let client of this.client_list) client.send(MessageType.SDP_OFFER_REQ, JSON.stringify(new_client_info));
+        // for (let client of this.client_list) client.send(MessageType.SDP_OFFER_REQ, JSON.stringify(new_client_info));
+
+        this.client_list.forEach((client) => {client.send(MessageType.SDP_OFFER_REQ, JSON.stringify(new_client_info))})
 
         this.client_list.push(new_client);
     }
