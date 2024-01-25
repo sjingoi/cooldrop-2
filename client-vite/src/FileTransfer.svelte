@@ -10,6 +10,7 @@
 
 
     import Peer from "./lib-ft/Peer.svelte";
+    import NavBar from "./lib-ft/NavBar.svelte";
     
     let display_name: string = "";
     let session_uuid: string = "";
@@ -91,6 +92,8 @@
     })
 
 </script>
+
+<NavBar/>
 
 <p>Name: {display_name}</p>
 <p>UUID: {session_uuid}</p>
