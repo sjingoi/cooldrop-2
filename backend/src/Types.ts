@@ -32,6 +32,7 @@ export enum MessageType {
     SDP_ANSWER = "sdp-answer",
     SDP_OFFER_REQ = "sdp-offer-req",
     ICE_CANDIDATE = "ice-candidate",
+    PEER_DISCONNECT = "peer-disconnect",
 }
 
 export type RTCMessageType = MessageType.ICE_CANDIDATE | MessageType.SDP_OFFER | MessageType.SDP_ANSWER;

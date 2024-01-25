@@ -12,4 +12,5 @@ export enum ServerMessageType {
     SDP_ANSWER = "sdp-answer",
     SDP_OFFER_REQ = "sdp-offer-req",
     ICE_CANDIDATE = "ice-candidate",
+    PEER_DISCONNECT = "peer-disconnect",
 }

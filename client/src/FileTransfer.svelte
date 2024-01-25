@@ -47,15 +47,15 @@
         socket.on(ServerMessageType.SDP_OFFER_REQ, (data) => {
             console.log("Creating new peer");
             let peerInfo: PeerInfo = JSON.parse(data);
-            let peer = new FilePeerConnection(peerInfo.peer_uuid, peerInfo.peer_name, display_name, session_uuid, socket);
-            peers = [ ...peers, peer ];
+            let new_peer = new FilePeerConnection(peerInfo.peer_uuid, peerInfo.peer_name, display_name, session_uuid, socket);
+            peers = [ ...peers, new_peer ];
         });
 
         socket.on(ServerMessageType.SDP_OFFER, (data) => {
             console.log("Creating new peer");
             let sdp_offer: SDP = JSON.parse(data);
-            let peer = new FilePeerConnection(sdp_offer.origin_uuid, sdp_offer.origin_name, display_name, session_uuid, socket, sdp_offer.sdp);
-            peers = [ ...peers, peer ];
+            let new_peer = new FilePeerConnection(sdp_offer.origin_uuid, sdp_offer.origin_name, display_name, session_uuid, socket, sdp_offer.sdp);
+            peers = [ ...peers, new_peer ];
         });
 
         socket.on(ServerMessageType.SDP_ANSWER, (data) => {
@@ -81,10 +81,16 @@
             }
         });
 
+        socket.on(ServerMessageType.PEER_DISCONNECT, (uuid) => {
+            console.log("Peer " + uuid + " left.");
+            const predicate = (peer: FilePeerConnection) => { return peer.getUUID() != uuid }
+            peers = peers.filter(predicate);
+        })
+
         return () => {
             socket.close();
             peers.forEach(peer => {
-                //close connection
+                peer.close();
             })
             return [];
         };

@@ -31,6 +31,7 @@ class ClientConnectionManager {
 
     public unRegisterClient(client: ClientConnection) {
         this.client_list.splice(this.client_list.findIndex(other_client => other_client == client), 1);
+        this.client_list.forEach((c) => c.send(MessageType.PEER_DISCONNECT, client.getSessionUUID()));
         Logger.getIns().logVerbose("Removed Client " + client.getSessionUUID() + " from array.")
     }
 

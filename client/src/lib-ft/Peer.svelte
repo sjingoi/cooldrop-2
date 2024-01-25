@@ -7,7 +7,8 @@
 
     let progress = 0;
     peer.addEventListener(PeerConnectionEvents.FILE_PROGRESS, (updated_progress: any) => {progress = updated_progress.detail.progress});
-    peer.addEventListener(PeerConnectionEvents.OPEN, () => {connected = true})
+    peer.addEventListener(PeerConnectionEvents.OPEN, () => {connected = true});
+    peer.addEventListener(PeerConnectionEvents.CLOSE, () => {connected = false});
 
     let files: FileList;
 

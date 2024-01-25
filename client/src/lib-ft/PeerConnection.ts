@@ -39,6 +39,12 @@ export class PeerConnection extends Peer { //extends typedEventTarget {
         }
     }
 
+    public close() {
+        if (this.rtc_datachannel) {
+            this.rtc_datachannel.close();
+        }
+    }
+
     private construct_remote(remote_offer: string) {
         this.rtc_connection.setRemoteDescription(JSON.parse(remote_offer))
             this.rtc_connection.ondatachannel = (event) => {
