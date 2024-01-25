@@ -1,7 +1,8 @@
 import { Peer } from "./Peer";
-import { ServerMessageType, type ServerConnection } from "./ServerConnection";
+import { ServerMessageType } from "./ServerConnection";
 import type { IceCandidate, SDP } from "./types";
 import { FileData, type FileHeader } from "./File";
+import type { Socket } from "socket.io-client";
 
 const SERVERS = { iceServers: [ { urls:["stun:stun1.l.google.com:19302"], } ] }
 
@@ -16,12 +17,12 @@ export class PeerConnection extends Peer { //extends typedEventTarget {
 
     protected rtc_connection: RTCPeerConnection;
     protected rtc_datachannel?: RTCDataChannel;
-    protected signalling_server: ServerConnection;
+    protected signalling_server: Socket;
     protected display_name: string;
     protected session_uuid: string;
     public connected: boolean;
 
-    constructor(peer_uuid: string, peer_name: string | null, display_name: string, session_uuid: string, signalling_server: ServerConnection, remote_offer?: string) {
+    constructor(peer_uuid: string, peer_name: string | null, display_name: string, session_uuid: string, signalling_server: Socket, remote_offer?: string) {
         super(peer_uuid, peer_name);
         this.display_name = display_name;
         this.session_uuid = session_uuid;
@@ -98,7 +99,7 @@ export class PeerConnection extends Peer { //extends typedEventTarget {
             recipient_uuid: this.getUUID(),
             ice: JSON.stringify(event.candidate),
         }
-        this.signalling_server.send(ServerMessageType.ICE_CANDIDATE, JSON.stringify(ice_candidate));
+        this.signalling_server.emit(ServerMessageType.ICE_CANDIDATE, JSON.stringify(ice_candidate));
         
     }
 
@@ -118,9 +119,9 @@ export class PeerConnection extends Peer { //extends typedEventTarget {
         }
 
         if (sdp.type == "offer") {
-            this.signalling_server.send(ServerMessageType.SDP_OFFER, JSON.stringify(sdp_offer));
+            this.signalling_server.emit(ServerMessageType.SDP_OFFER, JSON.stringify(sdp_offer));
         } else if (sdp.type == "answer") {
-            this.signalling_server.send(ServerMessageType.SDP_ANSWER, JSON.stringify(sdp_offer));
+            this.signalling_server.emit(ServerMessageType.SDP_ANSWER, JSON.stringify(sdp_offer));
         }
 
         let sdpEvent: Event = new CustomEvent(PeerConnectionEvents.SDP, { detail: { sdp: JSON.stringify(this.rtc_connection.localDescription) } });
@@ -137,7 +138,7 @@ export class FilePeerConnection extends PeerConnection {
     private chunk_size: number = 64*1024;
     private current_file: FileData | null = null;
 
-    constructor(uuid: string, name: string | null, display_name: string, session_uuid: string, server_connection: ServerConnection, remote_offer?: string) {
+    constructor(uuid: string, name: string | null, display_name: string, session_uuid: string, server_connection: Socket, remote_offer?: string) {
         super(uuid, name, display_name, session_uuid, server_connection, remote_offer);
         this.addEventListener("message", (e: Event) => {
             const customEvent  = e as CustomEvent;
