@@ -11,6 +11,7 @@ export enum PeerConnectionEvents {
     CLOSE = "close",
     MESSAGE = "message",
     SDP = "sdp",
+    FILE_PROGRESS = "file-progress"
 }
 
 export class PeerConnection extends Peer { //extends typedEventTarget {
@@ -131,8 +132,6 @@ export class PeerConnection extends Peer { //extends typedEventTarget {
 
 }
 
-
-
 export class FilePeerConnection extends PeerConnection {
 
     private chunk_size: number = 64*1024;
@@ -152,14 +151,13 @@ export class FilePeerConnection extends PeerConnection {
         this.sendFileData(file);
     }
 
-    private handleMessage(message: any) {
-        const dataChannel = this.rtc_datachannel;
+    private onProgress(progress: number) {
+        
+        console.log("Progress: " + progress);
+        this.dispatchEvent(new CustomEvent(PeerConnectionEvents.FILE_PROGRESS, { detail: { progress: progress } }));
+    }
 
-        if (dataChannel === undefined) {
-            console.log("Data channel not initialized.");
-            return;
-        }
-        //console.log("Type of data: " + typeof(message.data));
+    private handleMessage(message: any) {
     
         if (typeof(message) !== "string") {
             if (!this.current_file) {
@@ -168,16 +166,17 @@ export class FilePeerConnection extends PeerConnection {
             }
             const chunk: any = message;
             this.current_file.addChunk(chunk);
-            //console.log(fileHeader.numChunks);
-            //console.log(dataChannel);
-            dataChannel.send(JSON.stringify({
-                type: 'progress',
-                progress: this.current_file.getProgress()
-            }))
 
-            // this.on_progess(this.chunks.length / this.current_file_header.chunkcount);
-            console.log("Progress: " + this.current_file.getProgress());
+            this.onProgress(this.current_file.getProgress());
+
+            if (this.rtc_datachannel !== undefined) {
+                this.rtc_datachannel.send(JSON.stringify({
+                    type: 'progress',
+                    progress: this.current_file.getProgress()
+                }));
+            }
             
+
             if (this.current_file.getProgress() == 1) {
                 this.current_file.download();
                 this.current_file = null;
@@ -187,16 +186,14 @@ export class FilePeerConnection extends PeerConnection {
     
             switch (msg.type) {
                 case 'text':
-                    // recieveBox.textContent = message.data
+                    console.log("Recieved message: ", msg.text);
                     break;
                 case 'header':
                     let header: FileHeader = msg;
                     this.current_file = new FileData(header);
-                    //console.log(this.file_header);
                     break;
                 case 'progress':
-                    // this.on_progess(msg.progress);
-                    console.log("Progress: " + msg.progress);
+                    this.onProgress(msg.progress);
                     break;
                 default:
                     console.log('unknown message type: ' + msg.type);

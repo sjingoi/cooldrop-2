@@ -45,6 +45,6 @@ io.on('connection', (cws) => {
     cws.emit(MessageType.PRIVATE_UUID_REQ, "");
 })
 
-app.use(express.static("../client-vite/dist"));
+app.use(express.static("../client/dist"));
 
 server.listen(8080, "0.0.0.0");

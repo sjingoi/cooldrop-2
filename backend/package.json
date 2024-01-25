@@ -5,6 +5,11 @@
     "@types/ws": "^8.5.9",
     "typescript": "^5.2.2"
   },
+  "scripts": {
+    "build": "tsc",
+    "start": "node build/cooldrop.js",
+    "run": "tsc\nnode build/cooldrop.js"
+  },
   "dependencies": {
     "express": "^4.18.2",
     "http": "^0.0.1-security",

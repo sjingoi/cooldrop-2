@@ -5,7 +5,7 @@
     import { onMount } from "svelte";
 
     import { ServerMessageType } from "./lib-ft/ServerTypes";
-    import { FilePeerConnection, PeerConnection } from "./lib-ft/PeerConnection";
+    import { FilePeerConnection, PeerConnection, PeerConnectionEvents } from "./lib-ft/PeerConnection";
     import type { IceCandidate, PeerInfo, SDP, SDPEvent } from "./lib-ft/types";
 
 
@@ -99,6 +99,6 @@
 <p>UUID: {session_uuid}</p>
 <div>
     {#each peers as peer}
-        <Peer peer={peer} />
+        <Peer peer={peer}/>
     {/each}
 </div>
