@@ -4,7 +4,7 @@
     import { v4 as uuidv4 } from 'uuid';
     import { onMount } from "svelte";
 
-    import { ServerMessageType } from "./lib/ServerConnection";
+    import { ServerMessageType } from "./lib/ServerTypes";
     import { FilePeerConnection, PeerConnection } from "./lib/PeerConnection";
     import type { IceCandidate, PeerInfo, SDP, SDPEvent } from "./lib/types";
 
