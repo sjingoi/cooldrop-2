@@ -14,6 +14,7 @@ export default defineConfig({
       input: {
         main: resolve(__dirname, 'index.html'),
         seb: resolve(__dirname, 'seb', 'index.html'),
+        nameselect: resolve(__dirname, 'nameselect', 'index.html'),
       }
     }
   }

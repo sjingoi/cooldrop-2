@@ -21,6 +21,9 @@
     onMount(() => {
         
         display_name = localStorage.getItem("name") || "";
+        if (display_name === "") {
+            window.location.href = "/nameselect/";
+        }
         private_uuid = localStorage.getItem("uuid") || "";
         
         if (private_uuid === "") {
@@ -30,7 +33,7 @@
         
         // const serverconnection: ServerConnection = new ServerConnection("localhost:8080");
         
-        const socket = io("192.168.0.60:8080");
+        const socket = io("99.231.153.217:8080");
         
         socket.on(ServerMessageType.PUBLIC_UUID, (data) => {
             session_uuid = data
@@ -101,10 +104,14 @@
 
 <NavBar/>
 
-<p>Name: {display_name}</p>
+<p on:click={() => {window.location.href = "/nameselect/"}}>Name: {display_name}</p>
 <p>UUID: {session_uuid}</p>
-<div>
+<div style="peers-area">
     {#each peers as peer}
         <Peer peer={peer}/>
     {/each}
 </div>
+
+<style>
+
+</style>

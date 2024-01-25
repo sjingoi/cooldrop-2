@@ -1,6 +1,7 @@
 <script lang="ts">
     import type { FormEventHandler } from "svelte/elements";
     import { PeerConnectionEvents, type FilePeerConnection, PeerConnection } from "./PeerConnection";
+    import ComputerIcon from "./peer-computer-icon.svg"
 
     export let peer: FilePeerConnection;
     let connected: boolean = false;
@@ -20,7 +21,8 @@
 </script>
 
 <div>
-    <h3>{peer.name}</h3>
+    <p>{peer.name}</p>
+    <img src={ComputerIcon} alt="Computer Icon" style="width: 100px; height: 100px">
     <p>{peer.uuid}</p>
     {#if connected}
         <label for="file">Send File</label>
