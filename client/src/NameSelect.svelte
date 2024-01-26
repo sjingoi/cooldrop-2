@@ -4,8 +4,10 @@
     let name = "";
 
     const submitName = () => {
-        localStorage.setItem("name", name.trim());
-        window.location.href = "/";
+        if (name.trim() !== ""){
+            localStorage.setItem("name", name.trim());
+            window.location.href = "/";
+        }
     }
 
 
@@ -17,12 +19,24 @@
 <div class="name-select">
     <h1>Welcome to Cooldrop</h1>
     <p>To get started, please specify a name that will help others identify your device:</p>
-    <input type='text' class='name-input' bind:value={name}>
+    <input type='text' class='name-input' bind:value={name} on:keydown={(e) => {if (e.key === 'Enter') submitName()}}>
     <hr style="width: 10rem">
     <button class='submit-button' id='submit-name-btn' on:click={submitName} disabled={name.trim() === ""}>Submit</button>
 </div>
 
 <style> 
+
+    h1 {
+        letter-spacing: 2px;
+        text-align: center;
+        font-size: 48px;
+        font-weight: 700;
+    }
+
+    p {
+        text-align: center;
+    }
+
     .submit-button {
 
         font-size: 16px;
@@ -76,8 +90,17 @@
     }
 
     .name-select {
+        margin-top: 15vh;
+        padding: 16px;
         display: flex;
         align-items: center;
         flex-direction: column;
+        box-sizing: border-box;
+    }
+
+    .submit-button:disabled:hover {
+        background-color: var(--nav-bg-color);
+        cursor: not-allowed;
+        
     }
 </style>
