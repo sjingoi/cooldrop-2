@@ -106,12 +106,18 @@
 
 <p on:click={() => {window.location.href = "/nameselect/"}}>Name: {display_name}</p>
 <p>UUID: {session_uuid}</p>
-<div style="peers-area">
+<div class="peers-area">
     {#each peers as peer}
         <Peer peer={peer}/>
     {/each}
 </div>
 
 <style>
-
+    .peers-area {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 16px
+    }
 </style>
