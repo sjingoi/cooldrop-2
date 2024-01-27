@@ -47,4 +47,4 @@ io.on('connection', (cws) => {
 
 app.use(express.static("../client/dist"));
 
-server.listen(8080, "0.0.0.0");
+server.listen(80, "0.0.0.0");

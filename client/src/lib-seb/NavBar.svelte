@@ -4,8 +4,8 @@
     let links_opacity = "0%"
     let padding = "0px"
 
-    let links = [{ title: "Cooldrop", link: "/ft"}, 
-                 { title: "About", link: "/about"},
+    let links = [{ title: "Cooldrop", link: "/"}, 
+                 { title: "About", link: "/seb"},
                  { title: "Github", link: "https://github.com/sjingoi/"}, 
                  { title: "Contact", link: "mailto:sebi.jingoi@gmail.com"}, 
                 ]
