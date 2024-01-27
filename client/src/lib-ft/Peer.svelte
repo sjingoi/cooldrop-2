@@ -23,7 +23,6 @@
 
 <button class="peer" 
     on:click={() => fileInput.click()}
-    on:dragenter={(e) => console.log("HII")}
     on:dragover|preventDefault
     on:drop|preventDefault={(e) => files = e.dataTransfer?.files}>
     <h2>{peer.name}</h2>

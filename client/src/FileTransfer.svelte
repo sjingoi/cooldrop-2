@@ -33,7 +33,7 @@
         
         // const serverconnection: ServerConnection = new ServerConnection("localhost:8080");
         
-        const socket = io("99.231.153.217:8080");
+        const socket = io("cooldrop.cc");
         
         socket.on(ServerMessageType.PUBLIC_UUID, (data) => {
             session_uuid = data
