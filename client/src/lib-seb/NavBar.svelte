@@ -1,14 +1,11 @@
-<script>
+<script lang="ts">
     let links_height = "0px";
     let links_visibility = "hidden"
     let links_opacity = "0%"
     let padding = "0px"
 
-    let links = [{ title: "Cooldrop", link: "/"}, 
-                 { title: "About", link: "/seb"},
-                 { title: "Github", link: "https://github.com/sjingoi/"}, 
-                 { title: "Contact", link: "mailto:sebi.jingoi@gmail.com"}, 
-                ]
+    export let links: any;
+    export let title: string;
 
     const toggle_ham = () => {
         if (links_visibility === "hidden") {
@@ -28,7 +25,7 @@
 </script>
 
 <nav class="topbar">
-    <a class="app-title" href="/seb">Sebastian Jingoi</a>
+    <a class="app-title" href="/seb/">{title}</a>
     <div class="links">
         {#each links as entry} 
             <a href={entry.link}>{entry.title}</a>

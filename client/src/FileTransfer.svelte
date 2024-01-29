@@ -10,12 +10,26 @@
 
 
     import Peer from "./lib-ft/Peer.svelte";
-    import NavBar from "./lib-ft/NavBar.svelte";
+    import NavBar from "./lib-seb/NavBar.svelte";
     
     let display_name: string = "";
     let session_uuid: string = "";
     let private_uuid: string = "";
     let peers: FilePeerConnection[] = [];
+
+    let nav_links = [{
+            title: "Home",
+            link: "/seb/"
+        },
+        {
+            title: "Github",
+            link: "https://github.com/sjingoi/cooldrop-2"
+        },
+        {
+            title: "Contact",
+            link: "mailto:sebi.jingoi@gmail.com"
+        },
+    ]
 
     
     onMount(() => {
@@ -102,22 +116,48 @@
 
 </script>
 
-<NavBar/>
+<NavBar title="Cooldrop" links={nav_links}/>
 
-<p on:click={() => {window.location.href = "/nameselect/"}}>Name: {display_name}</p>
-<p>UUID: {session_uuid}</p>
+<div class="info-panel">
+    <p on:click={() => {window.location.href = "/nameselect/"}}>Name: {display_name}</p>
+    <p>UUID: {session_uuid}</p>
+</div>
 <div class="peers-area">
     {#each peers as peer}
         <Peer peer={peer}/>
     {/each}
+    {#if peers.length == 0}
+    <div class="no-clients">
+        <p>No peers are currently connected. Open Cooldrop on another device, or wait for others to join.</p>
+        <p class="tip">Tip: If you are having issues connecting, try refreshing the page.</p>       
+    </div>
+    {/if}
 </div>
 
 <style>
+    .info-panel {
+        height: 150px;
+        padding: 8px;
+    }
+
     .peers-area {
         display: flex;
         flex-direction: row;
         justify-content: center;
         flex-wrap: wrap;
-        gap: 16px
+        gap: 16px;
+    }
+
+    .no-clients {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .no-clients p {
+        text-align: center;
+    }
+
+    .no-clients .tip {
+        color: #888888;
     }
 </style>

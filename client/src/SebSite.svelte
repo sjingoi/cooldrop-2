@@ -6,9 +6,15 @@
     import gptbot from "./lib-seb/gptbot.png"
     import hero from "./lib-seb/hero.png"
     import NavBar from "./lib-seb/NavBar.svelte";
+
+    let links = [{ title: "Cooldrop", link: "/"}, 
+                 { title: "About", link: "/seb"},
+                 { title: "Github", link: "https://github.com/sjingoi/"}, 
+                 { title: "Contact", link: "mailto:sebi.jingoi@gmail.com"}, 
+                ]
 </script>
 
-<NavBar/>
+<NavBar links={links}/>
 
 <div class="hero">
     <div class="hero-content">
