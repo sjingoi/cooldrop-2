@@ -14,7 +14,7 @@
                 ]
 </script>
 
-<NavBar links={links}/>
+<NavBar title="Sebastian Jingoi" links={links}/>
 
 <div class="hero">
     <div class="hero-content">

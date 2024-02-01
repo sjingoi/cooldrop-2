@@ -76,7 +76,6 @@
         font-size: 36px;
         height: 70px;
         width: 90%;
-        color: white;
 
         border: none;
         overflow: auto;
