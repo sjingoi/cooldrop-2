@@ -10,6 +10,7 @@ const { v4: uuidv4 } = require('uuid');
 
 // const server = new WebSocket.Server({port: 8080});
 
+const port = parseInt(process.env.PORT!);
 const app = express();
 const server = http.createServer(app);
 
@@ -47,4 +48,9 @@ io.on('connection', (cws) => {
 
 app.use(express.static("../client/dist"));
 
-server.listen(80, "0.0.0.0");
+app.get("/test123", express.json(), async (req, res) => {
+    res.status(200);
+    res.send({response: "HI"});
+})
+
+server.listen(port, "0.0.0.0");
