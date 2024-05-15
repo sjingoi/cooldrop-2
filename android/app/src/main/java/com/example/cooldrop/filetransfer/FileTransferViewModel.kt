@@ -1,4 +1,4 @@
-package com.example.cooldrop
+package com.example.cooldrop.filetransfer
 
 import androidx.compose.runtime.toMutableStateList
 import androidx.lifecycle.ViewModel

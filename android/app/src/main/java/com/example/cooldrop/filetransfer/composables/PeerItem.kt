@@ -1,4 +1,4 @@
-package com.example.cooldrop
+package com.example.cooldrop.filetransfer.composables
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -22,6 +22,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.cooldrop.filetransfer.Peer
 import com.example.cooldrop.ui.theme.CooldropTheme
 import java.util.UUID
 
@@ -35,9 +36,9 @@ fun PeerItem(
         shape = MaterialTheme.shapes.medium,
         onClick = onClick,
         modifier = modifier
+            .border(1.5.dp, MaterialTheme.colorScheme.onSurfaceVariant, MaterialTheme.shapes.medium)
             .width(256.dp)
-            .height(256.dp)
-            .border(1.5.dp, MaterialTheme.colorScheme.onSurfaceVariant, MaterialTheme.shapes.medium),
+            .height(256.dp),
         color = MaterialTheme.colorScheme.surface,
     ) {
         Column(

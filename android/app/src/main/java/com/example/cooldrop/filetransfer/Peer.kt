@@ -1,4 +1,4 @@
-package com.example.cooldrop
+package com.example.cooldrop.filetransfer
 
 import java.util.UUID
 
