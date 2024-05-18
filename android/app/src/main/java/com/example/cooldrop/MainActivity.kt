@@ -40,7 +40,9 @@ fun CooldropApp() {
                     .padding(innerPadding),
                 color = MaterialTheme.colorScheme.background
             ) {
-                AppNavHost(navController = navController)
+                AppNavHost(
+                    navController = navController
+                )
             }
         }
     }

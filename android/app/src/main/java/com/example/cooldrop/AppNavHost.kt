@@ -22,7 +22,7 @@ fun AppNavHost(
             FileTransferScreen()
         }
         composable(route = NameSelect.route) {
-            NameSelectScreen(onSubmit = {navController.navigate(FileTransfer.route)})
+            NameSelectScreen()
         }
     }
 }

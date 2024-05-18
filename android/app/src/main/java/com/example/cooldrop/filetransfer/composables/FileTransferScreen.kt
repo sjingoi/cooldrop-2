@@ -2,7 +2,6 @@ package com.example.cooldrop.filetransfer.composables
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -20,10 +19,7 @@ fun FileTransferScreen(
         TitleBar {
             Text(text = "Cooldrop", style = MaterialTheme.typography.titleLarge)
         }
-        PeerList(list = fileTransferViewModel.peers, onPeerClicked = {})
-        NavigationBar {
-
-        }
+        PeerList(list = fileTransferViewModel.peers, onPeerClicked = fileTransferViewModel.onPeerClicked)
     }
 }
 

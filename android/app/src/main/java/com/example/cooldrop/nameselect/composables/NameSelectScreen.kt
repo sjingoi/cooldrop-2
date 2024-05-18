@@ -7,18 +7,21 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.cooldrop.nameselect.NameSelectViewModel
 
 @Composable
 fun NameSelectScreen(
-    onSubmit: (String) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    nameSelectViewModel: NameSelectViewModel = viewModel()
 ) {
     Column(
         verticalArrangement = Arrangement.SpaceEvenly,
         modifier = modifier
     ) {
         NameSelectUI(
-            onSubmit = onSubmit,
+            editableUserInputState = nameSelectViewModel.editableUserInputState,
+            onSubmit = nameSelectViewModel.onSubmit,
             modifier = modifier
         )
         Spacer(modifier = Modifier.height(64.dp))

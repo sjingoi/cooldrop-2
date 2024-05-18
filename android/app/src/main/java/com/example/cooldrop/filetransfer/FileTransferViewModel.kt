@@ -17,6 +17,10 @@ class FileTransferViewModel : ViewModel() {
         _peers.remove(peer)
         _peers.add(peer)
     }
+
+    val onPeerClicked: (Peer) -> Unit = {peer ->
+        println("Peer clicked")
+    }
 }
 
 private fun getPeers() = List(5) {
