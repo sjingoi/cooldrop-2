@@ -41,7 +41,9 @@ fun NameSelectUI(
         )
         Spacer(modifier = Modifier.height(16.dp))
         EditableUserInput(
-            keyboardActions = KeyboardActions(onDone = {onSubmit()}),
+            keyboardActions = KeyboardActions(onDone = {
+                if (allowSubmit) onSubmit()
+            }),
             editableUserInputState = editableUserInputState
         )
         Spacer(modifier = Modifier.height(16.dp))

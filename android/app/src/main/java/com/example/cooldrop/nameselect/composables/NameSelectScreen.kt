@@ -13,6 +13,7 @@ import com.example.cooldrop.nameselect.NameSelectViewModel
 @Composable
 fun NameSelectScreen(
     modifier: Modifier = Modifier,
+    onSubmit: () -> Unit,
     nameSelectViewModel: NameSelectViewModel = viewModel()
 ) {
     Column(
@@ -21,7 +22,8 @@ fun NameSelectScreen(
     ) {
         NameSelectUI(
             editableUserInputState = nameSelectViewModel.editableUserInputState,
-            onSubmit = nameSelectViewModel.onSubmit,
+            onSubmit = onSubmit,
+            allowSubmit = nameSelectViewModel.allowSubmit,
             modifier = modifier
         )
         Spacer(modifier = Modifier.height(64.dp))
