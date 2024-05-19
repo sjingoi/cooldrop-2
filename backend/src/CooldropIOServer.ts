@@ -42,12 +42,11 @@ export class CooldropIOSocket {
 
     constructor(cws: WebSocket) {
         this.cws = cws
-        this.cws.on
         this.cws.on('message', data => {
             let message: IOSocketMessage = JSON.parse(data.toString()) as IOSocketMessage
             let callback: CooldropIOClientCallback = this.callbacks[message.type]
             if (callback) {
-                callback(data)
+                callback(message.data)
             } else {
                 Logger.getIns().logInfo("Unhandled message type: " + message.type)
                 console.log(this.callbacks)
@@ -68,11 +67,16 @@ export class CooldropIOSocket {
         this.cws.onerror = callback
     }
 
+    public close() {
+        this.cws.close()
+    }
+
     public emit(type: string, data: any) {
         let message: IOSocketMessage = {
             type: type,
             data: data,
         }
+        Logger.getIns().logVerbose("Sending " + JSON.stringify(message))
         this.cws.send(JSON.stringify(message))
     }
 

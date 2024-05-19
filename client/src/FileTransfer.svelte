@@ -12,6 +12,7 @@
     import Peer from "./lib-ft/Peer.svelte";
     import NavBar from "./lib-seb/NavBar.svelte";
     import { BACKEND_URL } from "./urls";
+    import { CooldropIOClientSocket } from "./lib-ft/CooldropIOClient";
     
     let display_name: string = "";
     let session_uuid: string = "";
@@ -48,7 +49,7 @@
         
         // const serverconnection: ServerConnection = new ServerConnection("localhost:8080");
         
-        const socket = io(BACKEND_URL);
+        const socket = new CooldropIOClientSocket("ws://" + BACKEND_URL);
         
         socket.on(ServerMessageType.PUBLIC_UUID, (data) => {
             session_uuid = data
