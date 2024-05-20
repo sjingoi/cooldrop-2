@@ -2,16 +2,17 @@ import { ServerMessage, MessageType, SDP } from "./Types";
 // import { Connection } from "./Connection"
 import WebSocket = require("ws");
 import { type Socket } from "socket.io"
+import { CooldropIOSocket } from "./CooldropIOServer";
 const { v4: uuidv4 } = require('uuid');
 
 class ClientConnection {
     
-    public socket: Socket;
+    public socket: CooldropIOSocket;
     private private_uuid: string;
     private session_uuid: string;
     private name: string;
     
-    public constructor(socket: Socket, uuid: string, name: string) {
+    public constructor(socket: CooldropIOSocket, uuid: string, name: string) {
         this.socket = socket;
         this.private_uuid = uuid;
         this.name = name;
