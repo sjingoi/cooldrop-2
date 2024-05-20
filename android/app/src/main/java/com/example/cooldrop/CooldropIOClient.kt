@@ -12,49 +12,56 @@ import kotlinx.coroutines.plus
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.Response
+import okhttp3.WebSocket
+import okhttp3.WebSocketListener
+import okio.ByteString
+import java.util.concurrent.TimeUnit
 
 typealias CooldropIOCallback = (String) -> Unit
 
 @Serializable
 data class CooldropIOMessage(val type: String, val data: String)
 
-class CooldropIOClient(
+class CooldropIOClient (
     private val url: String,
     private val port: Int,
     private val callbacks: Map<String, CooldropIOCallback> = HashMap()
 ) {
-
     fun connect() {
-        val client = HttpClient {
-            install(WebSockets)
-        }
-        runBlocking {
-            client.webSocket(method = HttpMethod.Get, host = url, port = port, path = "/") {
-                val listenerRoutine = launch { listen() }
-                listenerRoutine.join()
+        val webSocketListener: WebSocketListener = object : WebSocketListener() {
+            override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
+                println("CLOSED")
+            }
+
+            override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
+                println("CLOSING")
+            }
+
+            override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
+                println("FAIL ${t.message}")
+            }
+
+            override fun onMessage(webSocket: WebSocket, text: String) {}
+
+            override fun onMessage(webSocket: WebSocket, bytes: ByteString) {
+                println("DATA: $bytes")
+            }
+
+            override fun onOpen(webSocket: WebSocket, response: Response) {
+                println("OPENEEEDDDDD!!!!")
             }
         }
-    }
 
-    private suspend fun DefaultClientWebSocketSession.listen() {
-        for (message in incoming) {
-            try {
-                message as? Frame.Text ?: continue
-                val ioMessage: CooldropIOMessage = Json.decodeFromString(message.readText())
-                println("Receieved message")
-                val callback = callbacks.get(ioMessage.type)
-                if (callback == null) {
-                    println("Unhandled type: " + ioMessage.type)
-                    continue
-                }
-                callback(ioMessage.data)
-            } catch (e: IllegalArgumentException) {
-                println("Recieved message that was not encoded in CooldropIO")
-            } catch (e: Exception) {
-                println("Unknown error")
-            }
-        }
-    }
+        val client = OkHttpClient()
 
+        val request = Request.Builder().url("${url}:$port").build()
+
+        val webSocket = client.newWebSocket(request, webSocketListener)
+
+        client.dispatcher.executorService.shutdown()
+    }
 }
 
