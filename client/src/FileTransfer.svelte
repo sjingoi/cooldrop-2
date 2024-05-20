@@ -49,7 +49,7 @@
         
         // const serverconnection: ServerConnection = new ServerConnection("localhost:8080");
         
-        const socket = new CooldropIOClientSocket("ws://" + BACKEND_URL);
+        const socket = new CooldropIOClientSocket(BACKEND_URL);
         
         socket.on(ServerMessageType.PUBLIC_UUID, (data) => {
             session_uuid = data

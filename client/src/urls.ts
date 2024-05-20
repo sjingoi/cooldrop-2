@@ -1,1 +1,1 @@
-export const BACKEND_URL = 'localhost:8080';
+export const BACKEND_URL = 'ws://192.168.0.60:8080';
