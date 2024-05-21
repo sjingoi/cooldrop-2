@@ -1,5 +1,19 @@
 <script>
-    import NavBar from "./lib-ft/NavBar.svelte";
+    import NavBar from "./lib-seb/NavBar.svelte";
+
+    let nav_links = [{
+            title: "Home",
+            link: "/seb/"
+        },
+        {
+            title: "Github",
+            link: "https://github.com/sjingoi/cooldrop-2"
+        },
+        {
+            title: "Contact",
+            link: "mailto:sebi.jingoi@gmail.com"
+        },
+    ]
 
     let name = "";
 
@@ -15,7 +29,7 @@
 </script>
 
 
-<NavBar/>
+<NavBar title="Cooldrop 2 (beta)" links={nav_links}/>
 <div class="name-select">
     <h1>Welcome to Cooldrop</h1>
     <p>To get started, please specify a name that will help others identify your device:</p>

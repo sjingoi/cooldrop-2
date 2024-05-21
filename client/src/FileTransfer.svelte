@@ -11,6 +11,8 @@
 
     import Peer from "./lib-ft/Peer.svelte";
     import NavBar from "./lib-seb/NavBar.svelte";
+    import { BACKEND_URL } from "./urls";
+    import { CooldropIOClientSocket } from "./lib-ft/CooldropIOClient";
     
     let display_name: string = "";
     let session_uuid: string = "";
@@ -47,7 +49,7 @@
         
         // const serverconnection: ServerConnection = new ServerConnection("localhost:8080");
         
-        const socket = io("cooldrop.cc");
+        const socket = new CooldropIOClientSocket(BACKEND_URL);
         
         socket.on(ServerMessageType.PUBLIC_UUID, (data) => {
             session_uuid = data
@@ -116,7 +118,7 @@
 
 </script>
 
-<NavBar title="Cooldrop" links={nav_links}/>
+<NavBar title="Cooldrop 2 (beta)" links={nav_links}/>
 
 <div class="info-panel">
     <p on:click={() => {window.location.href = "/nameselect/"}}>Name: {display_name}</p>

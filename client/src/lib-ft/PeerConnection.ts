@@ -3,6 +3,7 @@ import { ServerMessageType } from "./ServerTypes";
 import type { IceCandidate, SDP } from "./types";
 import { FileData, type FileHeader } from "./File";
 import type { Socket } from "socket.io-client";
+import type { CooldropIOClientSocket } from "./CooldropIOClient";
 
 const SERVERS = { iceServers: [ { urls:["stun:stun1.l.google.com:19302"], } ] }
 
@@ -18,12 +19,12 @@ export class PeerConnection extends Peer { //extends typedEventTarget {
 
     protected rtc_connection: RTCPeerConnection;
     protected rtc_datachannel?: RTCDataChannel;
-    protected signalling_server: Socket;
+    protected signalling_server: CooldropIOClientSocket;
     protected display_name: string;
     protected session_uuid: string;
     public connected: boolean;
 
-    constructor(peer_uuid: string, peer_name: string | null, display_name: string, session_uuid: string, signalling_server: Socket, remote_offer?: string) {
+    constructor(peer_uuid: string, peer_name: string | null, display_name: string, session_uuid: string, signalling_server: CooldropIOClientSocket, remote_offer?: string) {
         super(peer_uuid, peer_name);
         this.display_name = display_name;
         this.session_uuid = session_uuid;
@@ -143,7 +144,7 @@ export class FilePeerConnection extends PeerConnection {
     private chunk_size: number = 64*1024;
     private current_file: FileData | null = null;
 
-    constructor(uuid: string, name: string | null, display_name: string, session_uuid: string, server_connection: Socket, remote_offer?: string) {
+    constructor(uuid: string, name: string | null, display_name: string, session_uuid: string, server_connection: CooldropIOClientSocket, remote_offer?: string) {
         super(uuid, name, display_name, session_uuid, server_connection, remote_offer);
         this.addEventListener("message", (e: Event) => {
             const customEvent  = e as CustomEvent;
