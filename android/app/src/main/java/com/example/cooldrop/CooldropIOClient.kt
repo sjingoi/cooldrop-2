@@ -27,10 +27,15 @@ data class CooldropIOMessage(val type: String, val data: String)
 
 class CooldropIOClient (
     private val url: String,
-    private val port: Int,
     private val callbacks: Map<String, CooldropIOCallback> = HashMap()
 ) {
-    fun connect() {
+
+    private val client: OkHttpClient
+
+    private val request: Request
+
+    private val webSocket: WebSocket
+    init {
         val webSocketListener: WebSocketListener = object : WebSocketListener() {
             override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
                 println("CLOSED")
@@ -44,23 +49,35 @@ class CooldropIOClient (
                 println("FAIL ${t.message}")
             }
 
-            override fun onMessage(webSocket: WebSocket, text: String) {}
-
-            override fun onMessage(webSocket: WebSocket, bytes: ByteString) {
-                println("DATA: $bytes")
+            override fun onMessage(webSocket: WebSocket, text: String) {
+                try {
+                    val message: CooldropIOMessage = Json.decodeFromString(text)
+                    val callback = callbacks.get(message.type)
+                    if (callback == null) {
+                        println("Unhandled message type: ${message.type}")
+                        return
+                    }
+                    callback.invoke(message.data)
+                } catch (e: IllegalArgumentException) {
+                    println("Error parsing CooldropIO message")
+                }
             }
+
+            override fun onMessage(webSocket: WebSocket, bytes: ByteString) {}
 
             override fun onOpen(webSocket: WebSocket, response: Response) {
                 println("OPENEEEDDDDD!!!!")
             }
         }
 
-        val client = OkHttpClient()
+        this.client = OkHttpClient()
 
-        val request = Request.Builder().url("${url}:$port").build()
+        this.request = Request.Builder().url(url).build()
 
-        val webSocket = client.newWebSocket(request, webSocketListener)
+        this.webSocket = client.newWebSocket(request, webSocketListener)
+    }
 
+    fun closeConnection() {
         client.dispatcher.executorService.shutdown()
     }
 }

@@ -54,9 +54,7 @@ class MainActivity : ComponentActivity() {
 //            }
 //        }
 
-        val io = CooldropIOClient("ws://192.168.0.60", 8080)
-
-        io.connect()
+        val io = CooldropIOClient("ws://192.168.0.60:8080")
 
 
 
