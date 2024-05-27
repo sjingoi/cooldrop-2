@@ -5,12 +5,14 @@ import io.ktor.client.plugins.websocket.DefaultClientWebSocketSession
 import io.ktor.client.plugins.websocket.WebSockets
 import io.ktor.client.plugins.websocket.webSocket
 import io.ktor.http.HttpMethod
+import io.ktor.utils.io.tryCopyException
 import io.ktor.websocket.Frame
 import io.ktor.websocket.readText
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -25,9 +27,21 @@ typealias CooldropIOCallback = (String) -> Unit
 @Serializable
 data class CooldropIOMessage(val type: String, val data: String)
 
+object MessageType {
+    const val TEST = "test"
+    const val PRIVATE_UUID = "private-uuid"
+    const val PUBLIC_UUID = "public-uuid"
+    const val PRIVATE_UUID_REQ = "private-uuid-req"
+    const val SDP_OFFER = "sdp-offer"
+    const val SDP_ANSWER = "sdp-answer"
+    const val SDP_OFFER_REQ = "sdp-offer-req"
+    const val ICE_CANDIDATE = "ice-candidate"
+    const val PEER_DISCONNECT = "peer-disconnect"
+}
+
 class CooldropIOClient (
     private val url: String,
-    private val callbacks: Map<String, CooldropIOCallback> = HashMap()
+    private val callbacks: MutableMap<String, CooldropIOCallback> = HashMap()
 ) {
 
     private val client: OkHttpClient
@@ -35,6 +49,10 @@ class CooldropIOClient (
     private val request: Request
 
     private val webSocket: WebSocket
+
+
+
+
     init {
         val webSocketListener: WebSocketListener = object : WebSocketListener() {
             override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
@@ -57,7 +75,11 @@ class CooldropIOClient (
                         println("Unhandled message type: ${message.type}")
                         return
                     }
-                    callback.invoke(message.data)
+                    try {
+                        callback.invoke(message.data)
+                    } catch (e: Exception) {
+                        println("Error while invoking callback ${message.type} : $e")
+                    }
                 } catch (e: IllegalArgumentException) {
                     println("Error parsing CooldropIO message")
                 }
@@ -79,6 +101,16 @@ class CooldropIOClient (
 
     fun closeConnection() {
         client.dispatcher.executorService.shutdown()
+    }
+
+    fun addCallback(type: String, callback: CooldropIOCallback) {
+        this.callbacks[type] = callback
+    }
+
+    fun send(type: String, data: String) {
+        val cooldropIOMessage = CooldropIOMessage(type, data)
+        val strMessage = Json.encodeToString(cooldropIOMessage)
+        this.webSocket.send(strMessage)
     }
 }
 
