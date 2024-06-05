@@ -11,6 +11,7 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.webrtc.DataChannel
 import org.webrtc.IceCandidate
+import org.webrtc.IceCandidateErrorEvent
 import org.webrtc.MediaConstraints
 import org.webrtc.MediaStream
 import org.webrtc.PeerConnection
@@ -72,6 +73,9 @@ class FileTransferViewModel(application: Application) : AndroidViewModel(applica
     private val io = CooldropIOClient("ws://192.168.0.60:8080")
 
     init {
+        PeerConnectionFactory.initialize(InitializationOptions.builder(application.applicationContext).createInitializationOptions())
+        val peerConnectionFactory = PeerConnectionFactory.builder().createPeerConnectionFactory()
+
         io.addCallback(MessageType.PRIVATE_UUID_REQ) {
             val info = PeerInfo(UUID.randomUUID().toString(), user.name)
             val message = Json.encodeToString(info)
@@ -84,11 +88,8 @@ class FileTransferViewModel(application: Application) : AndroidViewModel(applica
 
         io.addCallback(MessageType.SDP_OFFER_REQ) {data ->
             println("Creating new peer")
-            println(data)
             lateinit var newPeer: Peer
             val peerInfo: PeerInfo = Json.decodeFromString(data)
-            PeerConnectionFactory.initialize(InitializationOptions.builder(application.applicationContext).createInitializationOptions())
-            val factory = PeerConnectionFactory.builder().createPeerConnectionFactory()
             val pcObserver = object : PeerConnection.Observer {
                 override fun onSignalingChange(p0: PeerConnection.SignalingState?) {
                     println("Signalling state changed: ${p0}")
@@ -170,7 +171,8 @@ class FileTransferViewModel(application: Application) : AndroidViewModel(applica
                     TODO("Not yet implemented")
                 }
             }
-            val rtcConnection = factory.createPeerConnection(iceServers, pcObserver) ?: return@addCallback
+            val rtcConnection = peerConnectionFactory
+                .createPeerConnection(iceServers, pcObserver) ?: return@addCallback
             val dataChannel = rtcConnection.createDataChannel("channel", DataChannel.Init())
             newPeer = Peer(
                 name = peerInfo.peer_name,
@@ -178,7 +180,6 @@ class FileTransferViewModel(application: Application) : AndroidViewModel(applica
                 rtcConnection = rtcConnection,
                 dataChannel = dataChannel
             )
-            println("Creating Offer")
             newPeer.rtcConnection.createOffer(sdpObserver, MediaConstraints())
             this.addPeer(newPeer)
         }
@@ -216,8 +217,10 @@ class FileTransferViewModel(application: Application) : AndroidViewModel(applica
         }
 
         io.addCallback(MessageType.ICE_CANDIDATE) {data ->
+            println("Recieved ice candidate")
             val ice = Json.decodeFromString<IceCandidateMessageData>(data)
             val serializableIce = Json.decodeFromString<SerializableIce>(ice.ice)
+            println(serializableIce)
             val iceCandidate = IceCandidate(serializableIce.sdpMid, serializableIce.sdpMLineIndex, serializableIce.candidate)
             val originPeer = this.peers.find { peer: Peer ->
                 peer.publicUuid.toString() == ice.origin_uuid
@@ -228,6 +231,124 @@ class FileTransferViewModel(application: Application) : AndroidViewModel(applica
             }
             originPeer.rtcConnection.addIceCandidate(iceCandidate)
         }
+
+        io.addCallback(MessageType.SDP_OFFER) {data ->
+            lateinit var newPeer: Peer
+            val sdpMessageData = Json.decodeFromString<SDPMessageData>(data)
+            val serializableSDP = Json.decodeFromString<SerializableSDP>(sdpMessageData.sdp)
+            assert(serializableSDP.type == SessionDescription.Type.OFFER.canonicalForm())
+            val sdp = SessionDescription(SessionDescription.Type.OFFER, serializableSDP.sdp)
+            println("SDP Object:")
+            println(sdp.type)
+            val pcObserver = object : PeerConnection.Observer {
+                override fun onSignalingChange(p0: PeerConnection.SignalingState?) {
+                    println("Signalling state changed: ${p0}")
+                }
+
+                override fun onIceConnectionChange(p0: PeerConnection.IceConnectionState?) {
+                    println("Ice connection change: ${p0}")
+                }
+
+                override fun onIceConnectionReceivingChange(p0: Boolean) {
+                    TODO("Not yet implemented")
+                }
+
+                override fun onIceCandidateError(event: IceCandidateErrorEvent?) {
+                    println("ICE CANDIDATE ERROR: ")
+                    if (event != null) {
+                        println(event.errorText)
+                    }
+                    super.onIceCandidateError(event)
+                }
+
+
+
+                override fun onIceGatheringChange(p0: PeerConnection.IceGatheringState?) {
+                    println("Ice gathering changed: ${p0}")
+                }
+
+                override fun onIceCandidate(ice: IceCandidate?) {
+                    println("ICE CANDIDATE: ")
+                    println(ice)
+                    println("PUBLIC UUID: ${user.publicUuid}")
+                    if (ice != null) {
+                        val iceCandidateMessage = IceCandidateMessageData(
+                            origin_uuid = user.publicUuid.toString(),
+                            recipient_uuid = sdpMessageData.origin_uuid,
+                            ice = Json.encodeToString(SerializableIce(ice.sdp, ice.sdpMLineIndex, ice.sdpMid))
+                        )
+                        io.send(MessageType.ICE_CANDIDATE, Json.encodeToString(iceCandidateMessage))
+                    }
+                }
+
+                override fun onIceCandidatesRemoved(p0: Array<out IceCandidate>?) {
+                    TODO("Not yet implemented")
+                }
+
+                override fun onAddStream(p0: MediaStream?) {
+                    TODO("Not yet implemented")
+                }
+
+                override fun onRemoveStream(p0: MediaStream?) {
+                    TODO("Not yet implemented")
+                }
+
+                override fun onDataChannel(p0: DataChannel?) {
+                    println("DATA CHANNEL!")
+                }
+
+                override fun onRenegotiationNeeded() {
+                    println("Renegotiation needed")
+                }
+            }
+            val sdpObserver = object : SdpObserver {
+                override fun onCreateSuccess(sdp: SessionDescription?) {
+                    println("Created SDP")
+                    if (sdp != null) {
+                        assert(sdp.type == SessionDescription.Type.ANSWER)
+                        val serializableSDPtoSend = SerializableSDP(
+                            sdp = sdp.description,
+                            type = sdp.type.canonicalForm()
+                        )
+                        val sdpMessageDatatoSend = SDPMessageData(
+                            origin_name = user.name,
+                            origin_uuid = user.publicUuid.toString(),
+                            recipient_uuid = sdpMessageData.origin_uuid,
+                            sdp = Json.encodeToString(serializableSDPtoSend)
+                        )
+                        println("Sending sdp answer")
+                        println(sdpMessageDatatoSend)
+                        newPeer.rtcConnection.setLocalDescription(this, sdp)
+                        io.send(MessageType.SDP_ANSWER, Json.encodeToString(sdpMessageDatatoSend))
+                    }
+                }
+
+                override fun onSetSuccess() {
+                    println("SDP set successfully!")
+                }
+
+                override fun onCreateFailure(p0: String?) {
+                    TODO("Not yet implemented")
+                }
+
+                override fun onSetFailure(p0: String?) {
+                    TODO("Not yet implemented")
+                }
+            }
+            val rtcConnection = peerConnectionFactory
+                .createPeerConnection(iceServers, pcObserver) ?: return@addCallback
+
+            newPeer = Peer(
+                name = sdpMessageData.origin_name,
+                publicUuid = UUID.fromString(sdpMessageData.origin_uuid),
+                rtcConnection = rtcConnection
+            )
+
+            rtcConnection.setRemoteDescription(sdpObserver, sdp)
+            rtcConnection.createAnswer(sdpObserver, MediaConstraints())
+
+            this.addPeer(newPeer)
+        }
     }
 
     fun removePeer(peer: Peer) {
@@ -235,7 +356,6 @@ class FileTransferViewModel(application: Application) : AndroidViewModel(applica
     }
 
     fun addPeer(peer: Peer) {
-        _peers.remove(peer)
         _peers.add(peer)
     }
 

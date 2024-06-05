@@ -1,16 +1,5 @@
 package com.example.cooldrop
 
-import io.ktor.client.HttpClient
-import io.ktor.client.plugins.websocket.DefaultClientWebSocketSession
-import io.ktor.client.plugins.websocket.WebSockets
-import io.ktor.client.plugins.websocket.webSocket
-import io.ktor.http.HttpMethod
-import io.ktor.utils.io.tryCopyException
-import io.ktor.websocket.Frame
-import io.ktor.websocket.readText
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.plus
-import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -20,7 +9,6 @@ import okhttp3.Response
 import okhttp3.WebSocket
 import okhttp3.WebSocketListener
 import okio.ByteString
-import java.util.concurrent.TimeUnit
 
 typealias CooldropIOCallback = (String) -> Unit
 
@@ -88,7 +76,7 @@ class CooldropIOClient (
             override fun onMessage(webSocket: WebSocket, bytes: ByteString) {}
 
             override fun onOpen(webSocket: WebSocket, response: Response) {
-                println("OPENEEEDDDDD!!!!")
+                println("Opened websocket")
             }
         }
 
