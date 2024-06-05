@@ -1,5 +1,7 @@
 [versions]
 agp = "8.3.2"
+googleWebrtc = "1.0.32006"
+googleWebrtcVersion = "1.0.22672"
 kotlin = "1.9.0"
 coreKtx = "1.12.0"
 junit = "4.13.2"
@@ -15,9 +17,14 @@ ktorClientWebsockets = "3.0.0-beta-1"
 ktorClientCio = "3.0.0-beta-1"
 kotlinxSerializationJson = "1.6.0"
 orgJetbrainsKotlinPluginSerializationGradlePlugin = "2.0.0-RC3"
+extensionOkhttp = "2.19.1"
+streamWebrtcAndroidVersion = "1.1.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+getstream-stream-webrtc-android = { module = "io.getstream:stream-webrtc-android", version.ref = "streamWebrtcAndroidVersion" }
+google-webrtc = { module = "org.webrtc:google-webrtc", version.ref = "googleWebrtc" }
+google-webrtc-v1022672 = { module = "org.webrtc:google-webrtc", version.ref = "googleWebrtcVersion" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
@@ -38,6 +45,7 @@ ktor-client-websockets = { group = "io.ktor", name = "ktor-client-websockets", v
 ktor-client-cio = { group = "io.ktor", name = "ktor-client-cio", version.ref = "ktorClientCio" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 org-jetbrains-kotlin-plugin-serialization-gradle-plugin = { group = "org.jetbrains.kotlin.plugin.serialization", name = "org.jetbrains.kotlin.plugin.serialization.gradle.plugin", version.ref = "orgJetbrainsKotlinPluginSerializationGradlePlugin" }
+extension-okhttp = { group = "com.google.android.exoplayer", name = "extension-okhttp", version.ref = "extensionOkhttp" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

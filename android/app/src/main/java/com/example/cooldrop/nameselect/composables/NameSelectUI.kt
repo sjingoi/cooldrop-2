@@ -13,6 +13,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -34,6 +35,7 @@ fun NameSelectUI(
             .wrapContentWidth()
             .padding(16.dp),
     ) {
+        val focusManager = LocalFocusManager.current
         Text(
             text = "Welcome to Cooldrop",
             style = MaterialTheme.typography.displaySmall,
@@ -42,13 +44,17 @@ fun NameSelectUI(
         Spacer(modifier = Modifier.height(16.dp))
         EditableUserInput(
             keyboardActions = KeyboardActions(onDone = {
+                focusManager.clearFocus()
                 if (allowSubmit) onSubmit()
             }),
             editableUserInputState = editableUserInputState
         )
         Spacer(modifier = Modifier.height(16.dp))
         Button(
-            onClick = { onSubmit() },
+            onClick = {
+                focusManager.clearFocus()
+                onSubmit()
+            },
             enabled = allowSubmit,
             shape = MaterialTheme.shapes.medium
         ) {

@@ -15,10 +15,11 @@ fun FileTransferScreen(
     modifier: Modifier = Modifier,
     fileTransferViewModel: FileTransferViewModel = viewModel()
 ) {
-    Column {
+    Column(modifier = modifier) {
         TitleBar {
             Text(text = "Cooldrop", style = MaterialTheme.typography.titleLarge)
         }
+        InfoPanel(user = fileTransferViewModel.user, onClick = {})
         PeerList(list = fileTransferViewModel.peers, onPeerClicked = fileTransferViewModel.onPeerClicked)
     }
 }

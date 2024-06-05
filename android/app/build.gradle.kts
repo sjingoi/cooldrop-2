@@ -69,6 +69,7 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.org.jetbrains.kotlin.plugin.serialization.gradle.plugin)
     implementation(libs.extension.okhttp)
+    implementation(libs.getstream.stream.webrtc.android)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

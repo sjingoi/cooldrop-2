@@ -12,7 +12,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.cooldrop.filetransfer.Peer
 import com.example.cooldrop.ui.theme.CooldropTheme
-import java.util.UUID
 
 @Composable
 fun PeerList(
@@ -39,10 +38,6 @@ fun PeerList(
 @Composable
 fun PeerListPreview() {
     CooldropTheme {
-        PeerList(list = getSamplePeers(), onPeerClicked = {})
+        PeerList(list = emptyList(), onPeerClicked = {})
     }
 }
-
-private fun getSamplePeers() = List(5) {
-        Peer(UUID.randomUUID(), "Seb's Device")
-    }

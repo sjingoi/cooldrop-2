@@ -19,12 +19,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.cooldrop.filetransfer.Peer
-import com.example.cooldrop.ui.theme.CooldropTheme
-import java.util.UUID
 
 @Composable
 fun PeerItem(
@@ -76,14 +73,14 @@ fun PeerItem(
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun PeerItemPreview() {
-    CooldropTheme {
-        PeerItem(
-            modifier = Modifier.padding(8.dp),
-            peer = Peer(UUID.randomUUID(),"Seb's Desktop"),
-            onClick = {}
-        )
-    }
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun PeerItemPreview() {
+//    CooldropTheme {
+//        PeerItem(
+//            modifier = Modifier.padding(8.dp),
+//            peer = Peer(UUID.randomUUID(),"Seb's Desktop"),
+//            onClick = {}
+//        )
+//    }
+//}

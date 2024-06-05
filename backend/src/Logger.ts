@@ -4,7 +4,7 @@ class Logger {
     
     private static instance: Logger;
 
-    public verbose: Boolean = false;
+    public verbose: Boolean = true;
     
     public static getIns() {
         return Logger.instance || (Logger.instance = new Logger());

@@ -101,11 +101,11 @@ export class PeerConnection extends Peer { //extends typedEventTarget {
     protected onIce(event: RTCPeerConnectionIceEvent) {
 
         if (event.candidate === null) return;
-
+        console.log(event.candidate.toJSON())
         let ice_candidate: IceCandidate = {
             origin_uuid: this.session_uuid,
             recipient_uuid: this.getUUID(),
-            ice: JSON.stringify(event.candidate),
+            ice: JSON.stringify(event.candidate.toJSON()),
         }
         this.signalling_server.emit(ServerMessageType.ICE_CANDIDATE, JSON.stringify(ice_candidate));
         

@@ -4,14 +4,23 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeGestures
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.core.view.WindowCompat
 import androidx.navigation.compose.rememberNavController
 import com.example.cooldrop.ui.theme.CooldropTheme
 import io.ktor.client.HttpClient
@@ -36,29 +45,13 @@ data class CooldropSocketMessage(val type: String, val data: String)
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-//        val client = HttpClient(CIO) {
-//            install(WebSockets) {
-//                pingInterval = 20_000
-//            }
-//        }
-//
-//        runBlocking {
-//            client.webSocket(method = HttpMethod.Get, host = "192.168.0.60", port = 8080, path = "/") {
-//
-//                val othersMessage = incoming.receive() as? Frame.Text
-//                println(othersMessage?.readText())
-//                val sampleMessage = CooldropSocketMessage("test", "HELLO")
-//                val myMessage = Json.encodeToString(sampleMessage)
-//                send(myMessage)
-//            }
-//        }
-
-
+        WindowCompat.setDecorFitsSystemWindows(window, false)
 
         enableEdgeToEdge()
         setContent {
-            CooldropApp()
+
+                CooldropApp()
+
         }
     }
 }
@@ -66,16 +59,17 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun CooldropApp() {
     CooldropTheme {
-        val navController = rememberNavController()
-//        val currentBackStack by navController.currentBackStackEntryAsState()
-//        val currentDestination = currentBackStack?.destination
 
-        Scaffold(modifier = Modifier.fillMaxSize()
-        ) { innerPadding ->
+        val navController = rememberNavController()
+        Box(
+            modifier = Modifier
+                .background(MaterialTheme.colorScheme.background)
+                .windowInsetsPadding(WindowInsets.statusBars),
+        ) {
             Surface(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(innerPadding),
+                    .imePadding(),
                 color = MaterialTheme.colorScheme.background
             ) {
                 AppNavHost(
@@ -83,6 +77,16 @@ fun CooldropApp() {
                 )
             }
         }
+//        val currentBackStack by navController.currentBackStackEntryAsState()
+//        val currentDestination = currentBackStack?.destination
+
+//        Scaffold(
+//            containerColor = Color.Transparent,
+//
+//            modifier = Modifier.fillMaxSize()
+//        ) { innerPadding ->
+//            
+//        }
     }
 }
 

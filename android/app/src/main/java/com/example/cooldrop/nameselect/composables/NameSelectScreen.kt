@@ -28,6 +28,6 @@ fun NameSelectScreen(
             allowSubmit = nameSelectViewModel.allowSubmit,
             modifier = modifier
         )
-        Spacer(modifier = Modifier.height(64.dp))
+        Spacer(modifier = Modifier.height(0.dp))
     }
 }
