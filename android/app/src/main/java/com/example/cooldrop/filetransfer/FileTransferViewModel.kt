@@ -1,6 +1,7 @@
 package com.example.cooldrop.filetransfer
 
 import android.app.Application
+import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.AndroidViewModel
 import com.example.cooldrop.CooldropIOClient
 import com.example.cooldrop.MessageType
@@ -64,7 +65,7 @@ class FileTransferViewModel(application: Application) : AndroidViewModel(applica
         get() = _user
 
 //    private val _peers = getPeers().toMutableStateList()
-    private val _peers: MutableList<Peer> = mutableListOf()
+    private val _peers: MutableList<Peer> = mutableStateListOf()
     val peers: List<Peer>
         get() = _peers
 
