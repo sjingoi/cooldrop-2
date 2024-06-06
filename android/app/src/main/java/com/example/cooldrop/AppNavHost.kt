@@ -34,6 +34,7 @@ fun AppNavHost(
                 onSubmit = {
                     fileTransferViewModel.setName(nameSelectViewModel.name)
                     navController.navigate(FileTransfer.route)
+                    fileTransferViewModel.connectToServer()
                 },
                 nameSelectViewModel = nameSelectViewModel
             )

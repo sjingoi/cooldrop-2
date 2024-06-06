@@ -27,68 +27,89 @@ object MessageType {
     const val PEER_DISCONNECT = "peer-disconnect"
 }
 
+object ConnectionStatus {
+    const val CONNECTED = "connected"
+    const val DISCONNECTED = "disconnected"
+}
+
 class CooldropIOClient (
     private val url: String,
+    private val onConnectionClose: () -> Unit,
     private val callbacks: MutableMap<String, CooldropIOCallback> = HashMap()
 ) {
 
-    private val client: OkHttpClient
+    private var client: OkHttpClient = OkHttpClient()
 
-    private val request: Request
+    private val request: Request = Request.Builder().url(url).build()
 
-    private val webSocket: WebSocket
+    private var reconnectOnClose: Boolean = true
 
+    private val webSocketListener: WebSocketListener = object : WebSocketListener() {
+        override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
+            println("CLOSED")
+            onConnectionClose.invoke()
+            if(reconnectOnClose) reconnect()
+        }
 
+        override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
+            println("CLOSING")
+        }
 
+        override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
+            println("Server connection failure: ${t.message}")
+            onConnectionClose.invoke()
+            if(reconnectOnClose) reconnect()
+        }
 
-    init {
-        val webSocketListener: WebSocketListener = object : WebSocketListener() {
-            override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
-                println("CLOSED")
-            }
-
-            override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
-                println("CLOSING")
-            }
-
-            override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
-                println("FAIL ${t.message}")
-            }
-
-            override fun onMessage(webSocket: WebSocket, text: String) {
-                try {
-                    val message: CooldropIOMessage = Json.decodeFromString(text)
-                    val callback = callbacks.get(message.type)
-                    if (callback == null) {
-                        println("Unhandled message type: ${message.type}")
-                        return
-                    }
-                    try {
-                        callback.invoke(message.data)
-                    } catch (e: Exception) {
-                        println("Error while invoking callback ${message.type} : $e")
-                    }
-                } catch (e: IllegalArgumentException) {
-                    println("Error parsing CooldropIO message")
+        override fun onMessage(webSocket: WebSocket, text: String) {
+            try {
+                val message: CooldropIOMessage = Json.decodeFromString(text)
+                val callback = callbacks.get(message.type)
+                if (callback == null) {
+                    println("Unhandled message type: ${message.type}")
+                    return
                 }
-            }
-
-            override fun onMessage(webSocket: WebSocket, bytes: ByteString) {}
-
-            override fun onOpen(webSocket: WebSocket, response: Response) {
-                println("Opened websocket")
+                try {
+                    callback.invoke(message.data)
+                } catch (e: Exception) {
+                    println("Error while invoking callback ${message.type} : $e")
+                }
+            } catch (e: IllegalArgumentException) {
+                println("Error parsing CooldropIO message")
             }
         }
 
-        this.client = OkHttpClient()
+        override fun onMessage(webSocket: WebSocket, bytes: ByteString) {}
 
-        this.request = Request.Builder().url(url).build()
-
-        this.webSocket = client.newWebSocket(request, webSocketListener)
+        override fun onOpen(webSocket: WebSocket, response: Response) {
+            println("Opened websocket")
+        }
     }
 
-    fun closeConnection() {
+    private lateinit var webSocket: WebSocket
+
+//    val connectionStatus: String
+
+    private fun initSocket() {
+        client = OkHttpClient()
+        webSocket = client.newWebSocket(request, webSocketListener)
         client.dispatcher.executorService.shutdown()
+    }
+
+
+    fun connect() {
+        if(::webSocket.isInitialized) webSocket.cancel()
+        reconnectOnClose = true
+        initSocket()
+    }
+
+    fun reconnect() {
+        initSocket()
+    }
+
+    fun disconnect() {
+        if(::webSocket.isInitialized) webSocket.close(1000, "Connection closed by client")
+        reconnectOnClose = false
     }
 
     fun addCallback(type: String, callback: CooldropIOCallback) {

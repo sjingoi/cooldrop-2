@@ -61,16 +61,17 @@ val iceServers: List<IceServer> = listOf(PeerConnection.IceServer.builder("stun:
 
 class FileTransferViewModel(application: Application) : AndroidViewModel(application) {
 
-    private var _user = User("Android Dev Test", UUID( 0 , 0 ), UUID.randomUUID())
+    private val io = CooldropIOClient("ws://192.168.0.60:8080", { _peers = mutableStateListOf() })
+
+    private var _user = User("", UUID( 0 , 0 ), UUID.randomUUID())
     val user: User
         get() = _user
 
-//    private val _peers = getPeers().toMutableStateList()
-    private val _peers: MutableList<Peer> = mutableStateListOf()
+    private var _peers: MutableList<Peer> = mutableStateListOf()
     val peers: List<Peer>
         get() = _peers
 
-    private val io = CooldropIOClient("ws://192.168.0.60:8080")
+    val launchedEffectKey = 0
 
     init {
         PeerConnectionFactory.initialize(InitializationOptions.builder(application.applicationContext).createInitializationOptions())
@@ -349,6 +350,10 @@ class FileTransferViewModel(application: Application) : AndroidViewModel(applica
 
             this.addPeer(newPeer)
         }
+    }
+
+    fun connectToServer() {
+        io.connect()
     }
 
     fun removePeer(peer: Peer) {
