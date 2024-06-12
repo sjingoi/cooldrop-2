@@ -68,7 +68,7 @@
         border-bottom: 2px;
         border-color: var(--nav-border-color);
         border-style: solid;
-        backdrop-filter: blur(64px);
+        backdrop-filter: blur(48px);
         
         transition: 300ms;
     }
@@ -79,6 +79,7 @@
         color: var(--main-text-color);
         margin: 0;
         padding: 0;
+        font-weight: normal;
     }
 
     .app-title {

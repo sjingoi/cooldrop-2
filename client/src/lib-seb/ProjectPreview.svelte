@@ -50,6 +50,25 @@
         color: var(--main-text-color);
     }
 
+    h3 {
+        font-size: 26px;
+        margin: 0px;
+        margin-bottom: 8px;
+    }
+
+    p {
+        margin: 0px;
+        font-size: 18px;
+        font-weight: normal;
+    }
+
+    .text {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 8px;
+    }
+
     
     @media (max-width: 720px) {
         .container {

@@ -6,7 +6,7 @@
     import FeaturedProject from "./lib-seb/FeaturedProject.svelte";
 
     let links = [{ title: "Cooldrop", link: "/"}, 
-                 { title: "About", link: "/seb"},
+                 { title: "About", link: "/seb/"},
                  { title: "Github", link: "https://github.com/sjingoi/"}, 
                  { title: "Contact", link: "mailto:sebi.jingoi@gmail.com"}, 
                 ]
