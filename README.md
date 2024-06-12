@@ -3,7 +3,7 @@
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
-  <a href="https://github.com/othneildrew/Best-README-Template">
+  <a href="https://cooldrop.cc">
     <img src="https://github.com/sjingoi/cooldrop-2/blob/site-update/client/public/favicon.png" alt="Logo" width="80" height="80">
   </a>
 
