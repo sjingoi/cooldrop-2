@@ -9,7 +9,7 @@
 
 <div class="content">
     <div style="padding-bottom: 5%;">
-        <h2>Projects</h2>
+        <h2>All Projects</h2>
         <p style="text-align: left">Both personal and academic projects.</p>
     </div>
     <div class="projects">
@@ -26,6 +26,13 @@
 </div>
 
 <style>
+
+    h2 {
+        letter-spacing: 1px;
+        text-align: left;
+        font-size: 32px;
+        font-weight: 700;
+    }
 
     .content {
         display: flex;
@@ -65,10 +72,6 @@
     @media (max-width: 1280px) {
         .content {
             flex-direction: column;
-        }
-        
-        .projects {
-            width: fit-content;
         }
     }
 

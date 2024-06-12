@@ -9,7 +9,7 @@
     <div class="container">
         <img class="thumbnail" src={image} alt="Project">
         <div class="text">
-            <h2>{name}</h2>
+            <h3>{name}</h3>
             <p>{description}</p>
         </div>
     </div>
@@ -67,7 +67,7 @@
             margin: 0;
         }
 
-        h2 {
+        h3 {
             font-size: 20px;
             margin-top: 12px;
             margin-bottom: 8px;

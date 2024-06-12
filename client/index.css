@@ -31,6 +31,32 @@ body {
     height: 100%;
 }
 
+a {
+    font-size: 20px;
+    color: #0b6dc8;
+    font-weight: bold;
+    font-family: D-DIN-Regular;
+}
+
+
+h1 {
+    letter-spacing: 2px;
+    text-align: center;
+    font-size: 48px;
+    font-weight: 700;
+}
+
+h2 {
+    letter-spacing: 1px;
+    text-align: left;
+    font-size: 32px;
+    font-weight: 700;
+}
+
+h3 {
+    font-size: 20px;
+}
+
 :root {
     --main-bg-color: #ffffff;
     --main-text-color: #000000;
