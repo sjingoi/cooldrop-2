@@ -1,11 +1,8 @@
 <script>
-    import ProjectPreview from "./lib-seb/ProjectPreview.svelte";
-    import mallapp from "./lib-seb/mallapp.png"
-    import cooldrop1 from "./lib-seb/cooldrop1.png"
-    import webrtclogo from "./lib-seb/webrtclogo.png"
-    import gptbot from "./lib-seb/gptbot.png"
-    import hero from "./lib-seb/hero.png"
+
     import NavBar from "./lib-seb/NavBar.svelte";
+    import AboutMeRow from "./lib-seb/AboutMeRow.svelte";
+    import ProjectsRow from "./lib-seb/ProjectsRow.svelte";
 
     let links = [{ title: "Cooldrop", link: "/"}, 
                  { title: "About", link: "/seb"},
@@ -23,23 +20,10 @@
     </div>
 </div>
 
-<div class="content">
-    <div style="padding-bottom: 5%;">
-        <h2>Projects</h2>
-        <p style="text-align: left">Both personal and academic projects.</p>
-    </div>
-    <div class="projects">
-        <div class="project-row">
-            <ProjectPreview name="Cooldrop File Transfer" description="Cool WebRTC Based File Transfer App" url="https://github.com/sjingoi/cooldrop" image={cooldrop1} />
-            <ProjectPreview name="Mall Android App" description="Academic Group Project" url="https://github.com/sjingoi/B07Group7Project" image={mallapp} />
-        </div>
-        <div class="project-row">
-            <ProjectPreview name="Manual WebRTC Signaler" description="Simple app to test WebRTC" url="https://github.com/sjingoi/webrtc-tester" image={webrtclogo} />
-            <ProjectPreview name="GPTBot" description="Discord Chat Bot using GPT API" url="https://github.com/sjingoi/ai-discord-bot" image={gptbot} />
-        </div>
-        <a class="see-more" href="https://github.com/sjingoi/">See more on Github →</a>
-    </div>
-</div>
+<AboutMeRow/>
+
+<ProjectsRow/>
+
 
 <style>
 
