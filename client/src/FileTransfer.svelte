@@ -118,7 +118,7 @@
 
 </script>
 
-<NavBar title="Cooldrop 2 (beta)" links={nav_links}/>
+<NavBar title="Cooldrop" links={nav_links}/>
 
 <div class="info-panel">
     <p on:click={() => {window.location.href = "/nameselect/"}}>Name: {display_name}</p>
