@@ -18,7 +18,7 @@
 
 <div class="hero">
     <div class="hero-content">
-        <h1>Welcome to Cooldrop</h1>
+        <h1>Sebastian Jingoi</h1>
         <p>Here you can find all the cool stuff I've created or worked on.</p>
     </div>
 </div>
