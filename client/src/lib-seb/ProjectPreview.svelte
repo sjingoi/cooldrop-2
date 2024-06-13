@@ -9,7 +9,7 @@
     <div class="container">
         <img class="thumbnail" src={image} alt="Project">
         <div class="text">
-            <h2>{name}</h2>
+            <h3>{name}</h3>
             <p>{description}</p>
         </div>
     </div>
@@ -50,6 +50,25 @@
         color: var(--main-text-color);
     }
 
+    h3 {
+        font-size: 26px;
+        margin: 0px;
+        margin-bottom: 8px;
+    }
+
+    p {
+        margin: 0px;
+        font-size: 18px;
+        font-weight: normal;
+    }
+
+    .text {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 8px;
+    }
+
     
     @media (max-width: 720px) {
         .container {
@@ -67,7 +86,7 @@
             margin: 0;
         }
 
-        h2 {
+        h3 {
             font-size: 20px;
             margin-top: 12px;
             margin-bottom: 8px;

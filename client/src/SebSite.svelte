@@ -1,14 +1,12 @@
 <script>
-    import ProjectPreview from "./lib-seb/ProjectPreview.svelte";
-    import mallapp from "./lib-seb/mallapp.png"
-    import cooldrop1 from "./lib-seb/cooldrop1.png"
-    import webrtclogo from "./lib-seb/webrtclogo.png"
-    import gptbot from "./lib-seb/gptbot.png"
-    import hero from "./lib-seb/hero.png"
+
     import NavBar from "./lib-seb/NavBar.svelte";
+    import AboutMeRow from "./lib-seb/AboutMeRow.svelte";
+    import ProjectsRow from "./lib-seb/ProjectsRow.svelte";
+    import FeaturedProject from "./lib-seb/FeaturedProject.svelte";
 
     let links = [{ title: "Cooldrop", link: "/"}, 
-                 { title: "About", link: "/seb"},
+                 { title: "About", link: "/seb/"},
                  { title: "Github", link: "https://github.com/sjingoi/"}, 
                  { title: "Contact", link: "mailto:sebi.jingoi@gmail.com"}, 
                 ]
@@ -19,43 +17,19 @@
 <div class="hero">
     <div class="hero-content">
         <h1>Sebastian Jingoi</h1>
-        <p>Here you can find all the cool stuff I've created or worked on.</p>
+        <p>Here you can find everything about me and the things I have worked on.</p>
+        <div style="height: 20vh;"></div>
     </div>
 </div>
 
-<div class="content">
-    <div style="padding-bottom: 5%;">
-        <h2>Projects</h2>
-        <p style="text-align: left">Both personal and academic projects.</p>
-    </div>
-    <div class="projects">
-        <div class="project-row">
-            <ProjectPreview name="Cooldrop File Transfer" description="Cool WebRTC Based File Transfer App" url="https://github.com/sjingoi/cooldrop" image={cooldrop1} />
-            <ProjectPreview name="Mall Android App" description="Academic Group Project" url="https://github.com/sjingoi/B07Group7Project" image={mallapp} />
-        </div>
-        <div class="project-row">
-            <ProjectPreview name="Manual WebRTC Signaler" description="Simple app to test WebRTC" url="https://github.com/sjingoi/webrtc-tester" image={webrtclogo} />
-            <ProjectPreview name="GPTBot" description="Discord Chat Bot using GPT API" url="https://github.com/sjingoi/ai-discord-bot" image={gptbot} />
-        </div>
-        <a class="see-more" href="https://github.com/sjingoi/">See more on Github →</a>
-    </div>
-</div>
+<AboutMeRow/>
+
+<FeaturedProject/>
+
+<ProjectsRow/>
+
 
 <style>
-
-    h1 {
-        letter-spacing: 2px;
-        text-align: center;
-        font-size: 48px;
-        font-weight: 700;
-    }
-
-    h2 {
-        letter-spacing: 1px;
-        text-align: left;
-        font-size: 32px;
-        font-weight: 700;
-    }
 
     p {
         text-align: center;
@@ -63,13 +37,16 @@
 
     .hero {
         margin: 0;
-        padding-top: 10%;
-        padding-bottom: 10%;
+        padding-top: 48px;
         width: 100%;
-        background-image: url(./lib-seb/hero.png);
+        background-image: url("./lib-seb/seb-galaxy1-rotated.jpg");
         background-size: cover;
         background-position: center;            
         background-blend-mode: multiply;
+        height: calc(100vh - 96px);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
     }
 
     .hero h1 {
@@ -157,7 +134,7 @@
     @media (max-width: 720px) {
         .hero {
             background-image: url("./lib-seb/seb-galaxy1.jpg");
-            height: 50vh;
+            /* height: 50vh; */
             display: flex;
             flex-direction: row;
             align-content: center;
