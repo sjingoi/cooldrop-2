@@ -1,5 +1,8 @@
 package com.example.cooldrop.filetransfer.composables
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -27,11 +30,20 @@ import com.example.cooldrop.filetransfer.Peer
 fun PeerItem(
     peer: Peer,
     onClick: () -> Unit,
+    onUris: (List<Uri>) -> Unit,
     modifier: Modifier = Modifier
 ) {
+
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { uris ->
+        onUris(uris);
+    }
+
     Surface(
         shape = MaterialTheme.shapes.medium,
-        onClick = onClick,
+        onClick = {
+            launcher.launch(arrayOf("*/*"))
+            onClick()
+        },
         modifier = modifier
             .border(1.5.dp, MaterialTheme.colorScheme.onSurfaceVariant, MaterialTheme.shapes.medium)
             .width(256.dp)

@@ -1,6 +1,8 @@
 package com.example.cooldrop.filetransfer
 
 import android.app.Application
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.AndroidViewModel
 import com.example.cooldrop.CooldropIOClient
@@ -368,8 +370,19 @@ class FileTransferViewModel(application: Application) : AndroidViewModel(applica
         _user = User(newName, user.publicUuid, user.privateUuid)
     }
 
-    val onPeerClicked: (Peer) -> Unit = {peer ->
+    fun onPeerClicked(peer: Peer) {
         println("Peer clicked")
+    }
+
+    fun onPeerUris(peer: Peer, uris: List<Uri>) {
+        println("Peer $peer opened files $uris")
+    }
+
+    fun openFile(pickerInitialUri: Uri) {
+        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+            addCategory(Intent.CATEGORY_OPENABLE)
+            type = "application/pdf"
+        }
     }
 }
 

@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -16,15 +15,23 @@ fun FileTransferScreen(
     modifier: Modifier = Modifier,
     fileTransferViewModel: FileTransferViewModel = viewModel()
 ) {
+
+
+
     Column(modifier = modifier) {
         TitleBar {
             Text(text = "Cooldrop", style = MaterialTheme.typography.titleLarge)
         }
         InfoPanel(user = fileTransferViewModel.user, onClick = {})
-        PeerList(list = fileTransferViewModel.peers, onPeerClicked = fileTransferViewModel.onPeerClicked)
-    }
-    LaunchedEffect(key1 = fileTransferViewModel.launchedEffectKey) {
-
+        PeerList(
+            list = fileTransferViewModel.peers,
+            onPeerClicked = {peer ->
+                fileTransferViewModel.onPeerClicked(peer)
+            },
+            onPeerUris = { peer, uris ->
+                fileTransferViewModel.onPeerUris(peer, uris)
+            }
+        )
     }
 }
 

@@ -1,5 +1,6 @@
 package com.example.cooldrop.filetransfer.composables
 
+import android.net.Uri
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -17,6 +18,7 @@ import com.example.cooldrop.ui.theme.CooldropTheme
 fun PeerList(
     list: List<Peer>,
     onPeerClicked: (Peer) -> Unit,
+    onPeerUris: (Peer, List<Uri>) -> Unit,
     modifier: Modifier = Modifier
 ) {
     LazyColumn(
@@ -29,7 +31,7 @@ fun PeerList(
             items = list,
             key = {peer -> peer.publicUuid}
         ) {peer ->
-            PeerItem(peer = peer, onClick = { onPeerClicked(peer) })
+            PeerItem(peer = peer, onClick = { onPeerClicked(peer) }, onUris = { uris -> onPeerUris(peer, uris)})
         }
     }
 }
@@ -38,6 +40,6 @@ fun PeerList(
 @Composable
 fun PeerListPreview() {
     CooldropTheme {
-        PeerList(list = emptyList(), onPeerClicked = {})
+        PeerList(list = emptyList(), onPeerClicked = {}, onPeerUris = { a, b -> })
     }
 }
