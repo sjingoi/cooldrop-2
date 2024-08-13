@@ -1,8 +1,8 @@
 package com.example.cooldrop.filetransfer
 
 import android.app.Application
-import android.content.Intent
 import android.net.Uri
+import android.provider.OpenableColumns
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.AndroidViewModel
 import com.example.cooldrop.CooldropIOClient
@@ -22,6 +22,7 @@ import org.webrtc.PeerConnectionFactory
 import org.webrtc.PeerConnectionFactory.InitializationOptions
 import org.webrtc.SdpObserver
 import org.webrtc.SessionDescription
+import java.io.InputStream
 import java.util.UUID
 
 @Serializable
@@ -57,6 +58,17 @@ data class SerializableIce(
     val sdpMLineIndex: Int,
     val sdpMid: String,
     val usernameFragment: String? = null
+)
+
+@Serializable
+data class FileHeader(
+    val type: String,
+    val filename: String,
+    val filetype: String,
+    val filesize: Long,
+    val chunksize: Int,
+    val lastchunksize: Int,
+    val chunkcount: Long,
 )
 
 val iceServers: List<IceServer> = listOf(PeerConnection.IceServer.builder("stun:stun1.l.google.com:19302").createIceServer())
@@ -375,13 +387,55 @@ class FileTransferViewModel(application: Application) : AndroidViewModel(applica
     }
 
     fun onPeerUris(peer: Peer, uris: List<Uri>) {
-        println("Peer $peer opened files $uris")
-    }
+        val chunksize: Int = 64*1024
 
-    fun openFile(pickerInitialUri: Uri) {
-        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
-            addCategory(Intent.CATEGORY_OPENABLE)
-            type = "application/pdf"
+        println("Peer $peer opened files $uris")
+
+        val projection = arrayOf(
+            OpenableColumns.DISPLAY_NAME,
+            OpenableColumns.SIZE,
+        )
+
+        if (uris.size > 0) {
+            val uri = uris[0];
+            val contentResolver = getApplication<Application>().applicationContext.contentResolver;
+            val cursor = contentResolver.query(uri, projection, null, null, null);
+
+            val fileName: String;
+            val fileSize: Long;
+
+            cursor?.use {
+                if (cursor.moveToFirst()) {
+                    val displayNameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                    val sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE)
+
+                    fileName = cursor.getString(displayNameIndex);
+                    fileSize = cursor.getLong(sizeIndex);
+
+                    contentResolver.openInputStream(uri)?.let { inputStream: InputStream ->
+
+                        var chunkcount = (fileSize / chunksize)
+                        val lastchunksize = (fileSize % chunksize).toInt();
+                        if (lastchunksize != 0) {
+                            chunkcount ++;
+                        }
+                        val fileHeader = FileHeader(
+                            type = "header",
+                            filename = fileName,
+                            filetype = "",
+                            filesize = fileSize,
+                            chunksize = chunksize,
+                            lastchunksize = lastchunksize,
+                            chunkcount = chunkcount
+                        )
+
+                        inputStream.close();
+                    }
+                }
+            } ?: run {
+                println("Failed to open cursor")
+                return
+            }
         }
     }
 }
