@@ -11,14 +11,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.cooldrop.filetransfer.Peer
+import com.example.cooldrop.filetransfer.PeerInfo
 import com.example.cooldrop.ui.theme.CooldropTheme
 
 @Composable
 fun PeerList(
-    list: List<Peer>,
-    onPeerClicked: (Peer) -> Unit,
-    onPeerUris: (Peer, List<Uri>) -> Unit,
+    list: List<PeerInfo>,
+    onPeerClicked: (PeerInfo) -> Unit,
+    onPeerUris: (PeerInfo, List<Uri>) -> Unit,
     modifier: Modifier = Modifier
 ) {
     LazyColumn(

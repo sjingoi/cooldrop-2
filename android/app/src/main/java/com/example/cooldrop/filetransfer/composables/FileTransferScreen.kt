@@ -24,7 +24,7 @@ fun FileTransferScreen(
         }
         InfoPanel(user = fileTransferViewModel.user, onClick = {})
         PeerList(
-            list = fileTransferViewModel.peers,
+            list = fileTransferViewModel.peers.map { peer -> peer.peerInfo },
             onPeerClicked = {peer ->
                 fileTransferViewModel.onPeerClicked(peer)
             },

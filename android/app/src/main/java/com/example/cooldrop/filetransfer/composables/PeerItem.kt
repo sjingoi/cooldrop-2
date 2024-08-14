@@ -24,11 +24,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.cooldrop.filetransfer.Peer
+import com.example.cooldrop.filetransfer.PeerInfo
 
 @Composable
 fun PeerItem(
-    peer: Peer,
+    peer: PeerInfo,
     onClick: () -> Unit,
     onUris: (List<Uri>) -> Unit,
     modifier: Modifier = Modifier
