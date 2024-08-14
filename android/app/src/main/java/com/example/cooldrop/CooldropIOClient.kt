@@ -59,11 +59,12 @@ object ConnectionStatus {
 class CooldropIOClient (
     private val url: String,
     private var peers: MutableList<P2PConnection> = mutableStateListOf(),
-    private val onConnectionClose: () -> Unit,
-    private val observers: MutableSet<SignallingServerObserver> = HashSet()
+    private val observer: Observer
 ) : SignallingServer {
 
     var user = User("", UUID( 0 , 0 ), UUID.randomUUID())
+
+    private val signallingServerObservers: MutableSet<SignallingServerObserver> = HashSet()
 
     private var client: OkHttpClient = OkHttpClient()
 
@@ -95,14 +96,6 @@ class CooldropIOClient (
         reconnectOnClose = false
     }
 
-    fun addObserver(observer: Observer) {
-        this.observers.add(observer)
-    }
-
-    fun removeObserver(observer: Observer) {
-        this.observers.remove(observer)
-    }
-
     private fun send(type: String, data: String) {
         val cooldropIOMessage = CooldropIOMessage(type, data)
         val strMessage = Json.encodeToString(cooldropIOMessage)
@@ -130,7 +123,7 @@ class CooldropIOClient (
                     println("Could not find peer ${iceMsg.origin_uuid}")
                     return
                 }
-                observers.forEach() { observer ->
+                signallingServerObservers.forEach() { observer ->
                     observer.onIceCandidate(iceCandidate, peer.peerInfo)
                 }
             }
@@ -142,7 +135,8 @@ class CooldropIOClient (
                 )
                 val sessionDescription = decodeSdp(sdpMsg.sdp);
                 assert(sessionDescription.type.canonicalForm() == SessionDescription.Type.OFFER.canonicalForm())
-                observers.forEach() {observer ->
+                observer.onPeerJoin(peerInfo, sessionDescription)
+                signallingServerObservers.forEach() {observer ->
                     observer.onSDPOffer(sessionDescription, peerInfo)
                 }
             }
@@ -157,12 +151,13 @@ class CooldropIOClient (
                     )
                     return
                 }
-                val peer = peers.find { it.peerInfo.publicUuid.toString() == sdpMsg.toString() }
-                if (peer == null)  {
-                    println("Could not find peer")
+                val peer = peers.find { it.peerInfo.publicUuid.toString() == sdpMsg.origin_uuid }
+                if (peer == null) {
+                    println("${peers.map { peer -> peer.peerInfo.publicUuid }}")
+                    println("Could not find peer ${sdpMsg.origin_uuid}")
                     return
                 }
-                observers.forEach() {observer ->
+                signallingServerObservers.forEach() {observer ->
                     observer.onSDPAnswer(sessionDescription, peer.peerInfo)
                 }
             }
@@ -170,10 +165,7 @@ class CooldropIOClient (
                 val disconnectedUuid = UUID.fromString(message.data)
                 val peer = peers.find { it.peerInfo.publicUuid.toString() == disconnectedUuid.toString() }
                 if (peer == null)  return
-                observers.forEach() { observer ->
-                    if (observer is Observer)
-                        observer.onPeerDisconnect(peer.peerInfo)
-                }
+                observer.onPeerLeave(peer.peerInfo)
             }
             MessageType.SDP_OFFER_REQ -> {
                 val peerInfoMsg = Json.decodeFromString<PeerInfoMessageData>(message.data)
@@ -181,10 +173,7 @@ class CooldropIOClient (
                     name = peerInfoMsg.peer_name,
                     publicUuid = UUID.fromString(peerInfoMsg.peer_uuid)
                 )
-                observers.forEach() { observer ->
-                    if (observer is Observer)
-                        observer.onSDPOfferReq(peerInfo)
-                }
+                observer.onPeerJoin(peerInfo, null)
             }
             MessageType.TEST -> {
                 println("Test message")
@@ -195,9 +184,18 @@ class CooldropIOClient (
         }
     }
 
-    interface Observer : SignallingServerObserver {
-        fun onPeerDisconnect (peerInfo: PeerInfo) {}
-        fun onSDPOfferReq (peerInfo: PeerInfo) {}
+    interface Observer {
+        fun onPeerJoin (peer: PeerInfo, sessionDescription: SessionDescription?) {}
+        fun onPeerLeave (peerInfo: PeerInfo) {}
+        fun onClose () {}
+    }
+
+    override fun addObserver(observer: SignallingServerObserver) {
+        this.signallingServerObservers.add(observer)
+    }
+
+    override fun removeObserver(observer: SignallingServerObserver) {
+        this.signallingServerObservers.remove(observer)
     }
 
     override fun sendSDPOffer(sessionDescription: SessionDescription, peer: PeerInfo) {
@@ -236,7 +234,7 @@ class CooldropIOClient (
     ) : WebSocketListener() {
         override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
             println("CLOSED")
-            c.onConnectionClose.invoke()
+            c.observer.onClose()
             if(c.reconnectOnClose) c.reconnect()
         }
 
@@ -246,7 +244,7 @@ class CooldropIOClient (
 
         override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
             println("Server connection failure: ${t.message}")
-            c.onConnectionClose.invoke()
+            c.observer.onClose()
             if(c.reconnectOnClose) c.reconnect()
         }
 
@@ -256,6 +254,8 @@ class CooldropIOClient (
                 c.handleMessage(message);
             } catch (e: IllegalArgumentException) {
                 println("Error parsing CooldropIO message: ${e.message}")
+            } catch (e: Exception) {
+                println("Error while parsing CooldropIO message")
             }
         }
 

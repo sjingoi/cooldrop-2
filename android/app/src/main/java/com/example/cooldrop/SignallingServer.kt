@@ -5,6 +5,8 @@ import org.webrtc.IceCandidate
 import org.webrtc.SessionDescription
 
 interface SignallingServer {
+    fun addObserver (observer: SignallingServerObserver)
+    fun removeObserver (observer: SignallingServerObserver)
     fun sendSDPOffer (sessionDescription: SessionDescription, peer: PeerInfo)
     fun sendSDPAnswer (sessionDescription: SessionDescription, peer: PeerInfo)
     fun sendIceCandidate (iceCandidate: IceCandidate, peer: PeerInfo)

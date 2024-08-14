@@ -42,10 +42,7 @@ class FileTransferViewModel(application: Application) : AndroidViewModel(applica
     private val io = CooldropIOClient(
         "ws://192.168.0.60:8080",
         _peers,
-        { _peers = mutableStateListOf() },
-        mutableSetOf(
-            CooldropIOObserver(this )
-        )
+        CooldropIOObserver (this)
     )
 
     private class CooldropIOObserver (val vm: FileTransferViewModel) : CooldropIOClient.Observer {
@@ -65,29 +62,22 @@ class FileTransferViewModel(application: Application) : AndroidViewModel(applica
 
         }
 
-        override fun onSDPOffer(sessionDescription: SessionDescription, peerInfo: PeerInfo) {
+        override fun onPeerJoin(peer: PeerInfo, sessionDescription: SessionDescription?) {
             vm.addPeer(P2PConnection(
                 vm.io,
                 observer,
                 PeerConnectionFactory.builder().createPeerConnectionFactory(),
-                peerInfo,
+                peer,
                 sessionDescription
             ))
-            println("Added to peer list: ${vm._peers}")
         }
 
-        override fun onPeerDisconnect(peerInfo: PeerInfo) {
+        override fun onPeerLeave(peerInfo: PeerInfo) {
             vm.removePeer(peerInfo)
         }
 
-        override fun onSDPOfferReq(peerInfo: PeerInfo) {
-            val newPeerConnection = P2PConnection(
-                vm.io,
-                observer,
-                PeerConnectionFactory.builder().createPeerConnectionFactory(),
-                peerInfo,
-                null
-            )
+        override fun onClose() {
+            vm._peers = mutableStateListOf()
         }
 
     }

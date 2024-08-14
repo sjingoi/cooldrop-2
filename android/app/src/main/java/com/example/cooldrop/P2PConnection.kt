@@ -18,7 +18,7 @@ class P2PConnection (
     protected val signallingServer: SignallingServer,
     protected val observer: P2PConnectionObserver,
     val peerInfo: PeerInfo,
-) : SdpObserver, PeerConnection.Observer {
+) {
     protected lateinit var rtcConnection: PeerConnection;
     protected var dataChannel: DataChannel? = null;
     var connected: Boolean = false;
@@ -30,79 +30,108 @@ class P2PConnection (
         peer: PeerInfo,
         remoteDescription: SessionDescription?) : this(signallingServer, observer, peer
     ) {
+        signallingServer.addObserver(signallingServerObserver)
 
-        peerConnectionFactory.createPeerConnection(iceServers, this)?.let {
+        peerConnectionFactory.createPeerConnection(iceServers, peerConnectionObserver)?.let {
             rtcConnection = it
         }
 
-        if (remoteDescription == null) { // Local connection
-            rtcConnection.createOffer(this, MediaConstraints())
+        if (remoteDescription == null) { // Local
+            println("Local Connection")
+            this.rtcConnection.createDataChannel("channel", DataChannel.Init())
+            rtcConnection.createOffer(sdpObserver, MediaConstraints())
         } else { // Remote connection
             println("REMOTE: ${remoteDescription}")
-            rtcConnection.setRemoteDescription(this, remoteDescription)
-            rtcConnection.createAnswer(this, MediaConstraints())
+            rtcConnection.setRemoteDescription(sdpObserver, remoteDescription)
+            rtcConnection.createAnswer(sdpObserver, MediaConstraints())
         }
     }
 
-    override fun onIceCandidate(ice: IceCandidate?) {
-        println("ICE CANDIDATE")
-        if (ice != null) {
-            signallingServer.sendIceCandidate(ice, peerInfo)
-        }
+    public fun disconnect () {
+        signallingServer.removeObserver(signallingServerObserver)
+        dataChannel?.close()
     }
 
-    override fun onDataChannel(dc: DataChannel?) {
-        if (dataChannel != null) {
-            dataChannel = dc
-            observer.onOpen()
-        }
-    }
-
-    override fun onCreateSuccess(sdp: SessionDescription?) {
-        println("CREATED SDP")
-        if (sdp != null) {
-            rtcConnection.setLocalDescription(this, sdp)
-            when (sdp.type) {
-                SessionDescription.Type.OFFER -> {
-                    signallingServer.sendSDPOffer(sdp, peerInfo)
+    private val sdpObserver = object : SdpObserver {
+        override fun onCreateSuccess(sdp: SessionDescription?) {
+            println("CREATED SDP")
+            if (sdp != null) {
+                rtcConnection.setLocalDescription(this, sdp)
+                when (sdp.type) {
+                    SessionDescription.Type.OFFER -> {
+                        signallingServer.sendSDPOffer(sdp, peerInfo)
+                    }
+                    SessionDescription.Type.ANSWER -> {
+                        signallingServer.sendSDPAnswer(sdp, peerInfo)
+                    }
+                    SessionDescription.Type.PRANSWER -> {}
+                    SessionDescription.Type.ROLLBACK -> {}
+                    null -> {}
                 }
-                SessionDescription.Type.ANSWER -> {
-                    signallingServer.sendSDPAnswer(sdp, peerInfo)
-                }
-                SessionDescription.Type.PRANSWER -> {}
-                SessionDescription.Type.ROLLBACK -> {}
-                null -> {}
+
             }
+        }
 
+        override fun onSetSuccess() {
+            println("SDP set successfully!")
+        }
+
+        override fun onCreateFailure(p0: String?) { error("Not implemented") }
+        override fun onSetFailure(p0: String?) { error("Not implemented") }
+    }
+
+    private val peerConnectionObserver = object : PeerConnection.Observer {
+        override fun onIceCandidate(ice: IceCandidate?) {
+            println("ICE CANDIDATE")
+            if (ice != null) {
+                signallingServer.sendIceCandidate(ice, peerInfo)
+            }
+        }
+
+        override fun onDataChannel(dc: DataChannel?) {
+            if (dataChannel != null) {
+                dataChannel = dc
+                observer.onOpen()
+            }
+        }
+
+        override fun onSignalingChange(p0: PeerConnection.SignalingState?) {
+            println("Signalling state changed: ${p0}")
+        }
+
+        override fun onIceConnectionChange(p0: PeerConnection.IceConnectionState?) {
+            println("Ice connection change: ${p0}")
+        }
+
+        override fun onIceGatheringChange(p0: PeerConnection.IceGatheringState?) {
+            println("Ice gathering changed: ${p0}")
+        }
+
+        override fun onRenegotiationNeeded() {
+            println("Renegotiation needed")
+        }
+
+        override fun onIceConnectionReceivingChange(p0: Boolean) { println ("onIceConnectionReceivingChange") }
+        override fun onIceCandidatesRemoved(p0: Array<out IceCandidate>?) { println("onIceConnectionReceivingChange") }
+        override fun onAddStream(p0: MediaStream?) { println("onAddStream") }
+        override fun onRemoveStream(p0: MediaStream?) { println("onRemoveStream") }
+    }
+
+    private val signallingServerObserver = object : SignallingServerObserver {
+
+        override fun onSDPAnswer(sessionDescription: SessionDescription, peerInfo: PeerInfo) {
+            if (peerInfo.publicUuid != this@P2PConnection.peerInfo.publicUuid)
+                return
+            rtcConnection.setRemoteDescription(sdpObserver ,sessionDescription)
+        }
+
+        override fun onIceCandidate(iceCandidate: IceCandidate, peerInfo: PeerInfo) {
+            if (peerInfo.publicUuid != this@P2PConnection.peerInfo.publicUuid)
+                return
+            rtcConnection.addIceCandidate(iceCandidate)
         }
     }
 
-    override fun onSignalingChange(p0: PeerConnection.SignalingState?) {
-        println("Signalling state changed: ${p0}")
-    }
-
-    override fun onIceConnectionChange(p0: PeerConnection.IceConnectionState?) {
-        println("Ice connection change: ${p0}")
-    }
-
-    override fun onIceGatheringChange(p0: PeerConnection.IceGatheringState?) {
-        println("Ice gathering changed: ${p0}")
-    }
-
-    override fun onRenegotiationNeeded() {
-        println("Renegotiation needed")
-    }
-
-    override fun onSetSuccess() {
-        println("SDP set successfully!")
-    }
-
-    override fun onIceConnectionReceivingChange(p0: Boolean) { println ("onIceConnectionReceivingChange") }
-    override fun onIceCandidatesRemoved(p0: Array<out IceCandidate>?) { println("onIceConnectionReceivingChange") }
-    override fun onAddStream(p0: MediaStream?) { println("onAddStream") }
-    override fun onRemoveStream(p0: MediaStream?) { println("onRemoveStream") }
-    override fun onCreateFailure(p0: String?) { println("onCreateFailure") }
-    override fun onSetFailure(p0: String?) { println("onSetFailure") }
 }
 
 interface P2PConnectionObserver {
