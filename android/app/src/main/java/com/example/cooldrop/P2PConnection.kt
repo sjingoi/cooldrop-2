@@ -20,8 +20,10 @@ class P2PConnection (
     val peerInfo: PeerInfo,
 ) {
     protected lateinit var rtcConnection: PeerConnection;
-    protected var dataChannel: DataChannel? = null;
+    public var dataChannel: DataChannel? = null;
     var connected: Boolean = false;
+
+
 
     constructor(
         signallingServer: SignallingServer,
@@ -47,7 +49,7 @@ class P2PConnection (
         }
     }
 
-    public fun disconnect () {
+    fun disconnect () {
         signallingServer.removeObserver(signallingServerObserver)
         dataChannel?.close()
     }
@@ -89,7 +91,7 @@ class P2PConnection (
         }
 
         override fun onDataChannel(dc: DataChannel?) {
-            if (dataChannel != null) {
+            if (dc != null) {
                 dataChannel = dc
                 observer.onOpen()
             }

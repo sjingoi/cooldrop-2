@@ -2,30 +2,25 @@ package com.example.cooldrop.filetransfer
 
 import android.app.Application
 import android.net.Uri
-import android.provider.OpenableColumns
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.cooldrop.CooldropIOClient
+import com.example.cooldrop.FileHeader
 import com.example.cooldrop.P2PConnection
 import com.example.cooldrop.P2PConnectionObserver
 import com.example.cooldrop.User
+import com.example.cooldrop.readFile
+import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
+import org.webrtc.DataChannel
 import org.webrtc.PeerConnectionFactory
 import org.webrtc.PeerConnectionFactory.InitializationOptions
 import org.webrtc.SessionDescription
-import java.io.InputStream
+import java.nio.ByteBuffer
 
-
-@Serializable
-data class FileHeader(
-    val type: String,
-    val filename: String,
-    val filetype: String,
-    val filesize: Long,
-    val chunksize: Int,
-    val lastchunksize: Int,
-    val chunkcount: Long,
-)
 
 class FileTransferViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -49,7 +44,7 @@ class FileTransferViewModel(application: Application) : AndroidViewModel(applica
 
         val observer = object : P2PConnectionObserver {
             override fun onOpen() {
-                TODO("Not yet implemented")
+                println("Opened connection")
             }
 
             override fun onClose() {
@@ -108,7 +103,45 @@ class FileTransferViewModel(application: Application) : AndroidViewModel(applica
     }
 
     fun onPeerUris(peer: PeerInfo, uris: List<Uri>) {
-        val chunksize: Int = 64*1024
+        val dataChannel = peers.find({ it.peerInfo == peer })?.dataChannel
+        if (dataChannel == null)
+            throw IllegalStateException()
+        val contentResolver = getApplication<Application>().applicationContext.contentResolver;
+        viewModelScope.launch {
+            uris.forEach { uri ->
+                readFile(
+                    uri,
+                    contentResolver,
+                    { onHeader(dataChannel, it) },
+                    { onChunk(dataChannel, it) }
+                )
+            }
+
+        }
+    }
+
+    private fun onHeader(dataChannel: DataChannel, header: FileHeader) {
+        println("Sending ${header}")
+        val bytes = ByteBuffer.wrap(Json.encodeToString(header).toByteArray())
+        dataChannel.send(DataChannel.Buffer(bytes, false))
+    }
+
+    private fun onChunk(dataChannel: DataChannel, byteArray: ByteArray) : Boolean {
+        val bytes = ByteBuffer.wrap(byteArray)
+        if (!dataChannel.send(DataChannel.Buffer(bytes, true))) {
+            println("SEND FAIL!!!!!!!!!!!!!!!!")
+            return false
+        }
+        return true
+    }
+}
+
+//private fun getPeers() = List(5) {
+//    Peer(UUID.randomUUID(), "Seb's Device")
+//}
+
+/*
+val chunksize: Int = 64*1024
 
         println("Peer $peer opened files $uris")
 
@@ -158,9 +191,4 @@ class FileTransferViewModel(application: Application) : AndroidViewModel(applica
                 return
             }
         }
-    }
-}
-
-//private fun getPeers() = List(5) {
-//    Peer(UUID.randomUUID(), "Seb's Device")
-//}
+ */
