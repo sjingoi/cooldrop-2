@@ -40,7 +40,7 @@ class P2PConnection (
 
         if (remoteDescription == null) { // Local
             println("Local Connection")
-            this.rtcConnection.createDataChannel("channel", DataChannel.Init())
+            dataChannel = this.rtcConnection.createDataChannel("channel", DataChannel.Init())
             rtcConnection.createOffer(sdpObserver, MediaConstraints())
         } else { // Remote connection
             println("REMOTE: ${remoteDescription}")
@@ -91,6 +91,7 @@ class P2PConnection (
         }
 
         override fun onDataChannel(dc: DataChannel?) {
+            println("DATACHANNEL")
             if (dc != null) {
                 dataChannel = dc
                 observer.onOpen()
