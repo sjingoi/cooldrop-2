@@ -1,6 +1,7 @@
 package com.example.cooldrop
 
 import com.example.cooldrop.filetransfer.PeerInfo
+import io.ktor.util.moveToByteArray
 import org.webrtc.DataChannel
 import org.webrtc.IceCandidate
 import org.webrtc.MediaConstraints
@@ -10,46 +11,60 @@ import org.webrtc.PeerConnection.IceServer
 import org.webrtc.PeerConnectionFactory
 import org.webrtc.SdpObserver
 import org.webrtc.SessionDescription
+import java.nio.ByteBuffer
 
 val iceServers: List<IceServer> = listOf(PeerConnection
     .IceServer.builder("stun:stun1.l.google.com:19302").createIceServer())
 
 class P2PConnection (
     protected val signallingServer: SignallingServer,
-    protected val observer: P2PConnectionObserver,
+    protected val observer: ConnectionObserver,
+    protected val dataObserver: DataConnectionObserver,
     val peerInfo: PeerInfo,
-) {
+    val remoteDescription: SessionDescription?,
+) : DataConnection {
+
     protected lateinit var rtcConnection: PeerConnection;
-    public var dataChannel: DataChannel? = null;
+    private var dataChannel: DataChannel? = null;
     var connected: Boolean = false;
-
-
 
     constructor(
         signallingServer: SignallingServer,
-        observer: P2PConnectionObserver,
+        observer: ConnectionObserver,
+        dataObserver: DataConnectionObserver,
         peerConnectionFactory: PeerConnectionFactory,
-        peer: PeerInfo,
-        remoteDescription: SessionDescription?) : this(signallingServer, observer, peer
-    ) {
-        signallingServer.addObserver(signallingServerObserver)
+        peerInfo: PeerInfo,
+        remoteDescription: SessionDescription?,
+        ) : this(signallingServer, observer, dataObserver, peerInfo, remoteDescription) {
 
         peerConnectionFactory.createPeerConnection(iceServers, peerConnectionObserver)?.let {
             rtcConnection = it
         }
+    }
 
+    override fun sendData(byteArray: ByteArray) : Boolean {
+        val bytes = ByteBuffer.wrap(byteArray)
+        return dataChannel?.send(DataChannel.Buffer(bytes, true)) ?: false
+    }
+
+    override fun sendText(string: String): Boolean {
+        val bytes = ByteBuffer.wrap(string.toByteArray())
+        return dataChannel?.send(DataChannel.Buffer(bytes, false)) ?: false
+    }
+
+    override fun openConnection() {
+        signallingServer.addObserver(signallingServerObserver)
         if (remoteDescription == null) { // Local
-            println("Local Connection")
             dataChannel = this.rtcConnection.createDataChannel("channel", DataChannel.Init())
+            dataChannel?.registerObserver(dataChannelObserver)
             rtcConnection.createOffer(sdpObserver, MediaConstraints())
         } else { // Remote connection
-            println("REMOTE: ${remoteDescription}")
             rtcConnection.setRemoteDescription(sdpObserver, remoteDescription)
             rtcConnection.createAnswer(sdpObserver, MediaConstraints())
         }
     }
 
-    fun disconnect () {
+    override fun closeConnection () {
         signallingServer.removeObserver(signallingServerObserver)
         dataChannel?.close()
     }
@@ -93,6 +108,7 @@ class P2PConnection (
         override fun onDataChannel(dc: DataChannel?) {
             println("DATACHANNEL")
             if (dc != null) {
+                dc.registerObserver(dataChannelObserver)
                 dataChannel = dc
                 observer.onOpen()
             }
@@ -133,6 +149,20 @@ class P2PConnection (
                 return
             rtcConnection.addIceCandidate(iceCandidate)
         }
+    }
+
+    private val dataChannelObserver = object : DataChannel.Observer {
+
+        override fun onBufferedAmountChange(previousAmount: Long) { }
+
+        override fun onStateChange() { }
+
+        override fun onMessage(buffer: DataChannel.Buffer?) {
+            buffer?.data?.moveToByteArray()?.let {
+                dataObserver.onReceiveData(it)
+            }
+        }
+
     }
 
 }

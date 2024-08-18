@@ -5,21 +5,20 @@ import android.net.Uri
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.cooldrop.ConnectionObserver
 import com.example.cooldrop.CooldropIOClient
+import com.example.cooldrop.DataConnection
+import com.example.cooldrop.DataConnectionObserver
 import com.example.cooldrop.FileHeader
 import com.example.cooldrop.P2PConnection
-import com.example.cooldrop.P2PConnectionObserver
 import com.example.cooldrop.User
 import com.example.cooldrop.readFile
 import kotlinx.coroutines.launch
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import org.webrtc.DataChannel
 import org.webrtc.PeerConnectionFactory
 import org.webrtc.PeerConnectionFactory.InitializationOptions
 import org.webrtc.SessionDescription
-import java.nio.ByteBuffer
 
 
 class FileTransferViewModel(application: Application) : AndroidViewModel(application) {
@@ -42,7 +41,7 @@ class FileTransferViewModel(application: Application) : AndroidViewModel(applica
 
     private class CooldropIOObserver (val vm: FileTransferViewModel) : CooldropIOClient.Observer {
 
-        val observer = object : P2PConnectionObserver {
+        val observer = object : ConnectionObserver {
             override fun onOpen() {
                 println("Opened connection")
             }
@@ -57,14 +56,23 @@ class FileTransferViewModel(application: Application) : AndroidViewModel(applica
 
         }
 
+        val dataObserver = object : DataConnectionObserver {
+            override fun onReceiveData(byteArray: ByteArray) {
+                println("Received data")
+            }
+        }
+
         override fun onPeerJoin(peer: PeerInfo, sessionDescription: SessionDescription?) {
-            vm.addPeer(P2PConnection(
+            val newPeer = P2PConnection(
                 vm.io,
                 observer,
+                dataObserver,
                 PeerConnectionFactory.builder().createPeerConnectionFactory(),
                 peer,
                 sessionDescription
-            ))
+            )
+            vm.addPeer(newPeer)
+            newPeer.openConnection()
         }
 
         override fun onPeerLeave(peerInfo: PeerInfo) {
@@ -103,32 +111,28 @@ class FileTransferViewModel(application: Application) : AndroidViewModel(applica
     }
 
     fun onPeerUris(peer: PeerInfo, uris: List<Uri>) {
-        val dataChannel = peers.find({ it.peerInfo == peer })?.dataChannel
-        if (dataChannel == null)
-            throw IllegalStateException()
+        val dataConnection = peers.find({ it.peerInfo == peer }) ?: return
         val contentResolver = getApplication<Application>().applicationContext.contentResolver;
         viewModelScope.launch {
             uris.forEach { uri ->
                 readFile(
                     uri,
                     contentResolver,
-                    { onHeader(dataChannel, it) },
-                    { onChunk(dataChannel, it) }
+                    { onHeader(dataConnection, it) },
+                    { onChunk(dataConnection, it) }
                 )
             }
 
         }
     }
 
-    private fun onHeader(dataChannel: DataChannel, header: FileHeader) {
+    private fun onHeader(connection: DataConnection, header: FileHeader) {
         println("Sending ${header}")
-        val bytes = ByteBuffer.wrap(Json.encodeToString(header).toByteArray())
-        dataChannel.send(DataChannel.Buffer(bytes, false))
+        connection.sendText(Json.encodeToString(header))
     }
 
-    private fun onChunk(dataChannel: DataChannel, byteArray: ByteArray) : Boolean {
-        val bytes = ByteBuffer.wrap(byteArray)
-        if (!dataChannel.send(DataChannel.Buffer(bytes, true))) {
+    private fun onChunk(connection: DataConnection, byteArray: ByteArray) : Boolean {
+        if (!connection.sendData(byteArray)) {
             println("SEND FAIL!!!!!!!!!!!!!!!!")
             return false
         }
