@@ -13,9 +13,6 @@ data class FileHeader (
     val filetype: String,
     val filesize: Long,
     val chunksize: Int,
-    val lastchunksize: Long,
-    val chunkcount: Long,
-    val type: String
 )
 
 const val CHUNK_SIZE: Int = 1024 * 64;
@@ -40,30 +37,27 @@ suspend fun readFile (uri: Uri, contentResolver: ContentResolver, onHeader: (hea
     fileName = cursor.getString(displayNameIndex)
     fileSize = cursor.getLong(sizeIndex)
 
-    var chunkCount = fileSize / CHUNK_SIZE
-    val lastChunkSize = fileSize % CHUNK_SIZE
-    if (lastChunkSize > 0) {
-        chunkCount ++;
-    }
     val fileHeader = FileHeader(
-        type = "header",
         filename = fileName,
         filetype = "bruh",
         filesize = fileSize,
         chunksize = CHUNK_SIZE,
-        lastchunksize = lastChunkSize,
-        chunkcount = chunkCount,
     )
 
     contentResolver.openInputStream(uri)?.let { inputStream: InputStream ->
         onHeader(fileHeader)
-        val byteArray = ByteArray(CHUNK_SIZE)
-        for (i in 1..chunkCount) {
-            inputStream.read(byteArray, 0, CHUNK_SIZE)
+        var bytesToSend = fileSize;
+        while (bytesToSend > 0) {
+            val minBytes: Int = if (CHUNK_SIZE < bytesToSend) CHUNK_SIZE else bytesToSend.toInt()
+            val byteArray = ByteArray(minBytes)
+            inputStream.read(byteArray, 0, minBytes)
+            println("Sending ${minBytes}")
             while (!onChunk(byteArray)) {
                 delay(500)
             }
+            bytesToSend -= minBytes;
         }
+        inputStream.close()
     }
 
 

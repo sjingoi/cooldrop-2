@@ -11,6 +11,7 @@ import com.example.cooldrop.DataConnection
 import com.example.cooldrop.DataConnectionObserver
 import com.example.cooldrop.FileHeader
 import com.example.cooldrop.P2PConnection
+import com.example.cooldrop.PeerMessage
 import com.example.cooldrop.User
 import com.example.cooldrop.readFile
 import kotlinx.coroutines.launch
@@ -19,7 +20,6 @@ import kotlinx.serialization.json.Json
 import org.webrtc.PeerConnectionFactory
 import org.webrtc.PeerConnectionFactory.InitializationOptions
 import org.webrtc.SessionDescription
-
 
 class FileTransferViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -47,7 +47,7 @@ class FileTransferViewModel(application: Application) : AndroidViewModel(applica
             }
 
             override fun onClose() {
-                TODO("Not yet implemented")
+                println("Closed connection")
             }
 
             override fun onError() {
@@ -122,13 +122,16 @@ class FileTransferViewModel(application: Application) : AndroidViewModel(applica
                     { onChunk(dataConnection, it) }
                 )
             }
-
         }
     }
 
     private fun onHeader(connection: DataConnection, header: FileHeader) {
         println("Sending ${header}")
-        connection.sendText(Json.encodeToString(header))
+        val message = PeerMessage(
+            type = "header",
+            data = Json.encodeToString(header)
+        )
+        connection.sendText(Json.encodeToString(message))
     }
 
     private fun onChunk(connection: DataConnection, byteArray: ByteArray) : Boolean {
@@ -139,60 +142,3 @@ class FileTransferViewModel(application: Application) : AndroidViewModel(applica
         return true
     }
 }
-
-//private fun getPeers() = List(5) {
-//    Peer(UUID.randomUUID(), "Seb's Device")
-//}
-
-/*
-val chunksize: Int = 64*1024
-
-        println("Peer $peer opened files $uris")
-
-        val projection = arrayOf(
-            OpenableColumns.DISPLAY_NAME,
-            OpenableColumns.SIZE,
-        )
-
-        if (uris.size > 0) {
-            val uri = uris[0];
-            val contentResolver = getApplication<Application>().applicationContext.contentResolver;
-            val cursor = contentResolver.query(uri, projection, null, null, null);
-
-            val fileName: String;
-            val fileSize: Long;
-
-            cursor?.use {
-                if (cursor.moveToFirst()) {
-                    val displayNameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
-                    val sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE)
-
-                    fileName = cursor.getString(displayNameIndex);
-                    fileSize = cursor.getLong(sizeIndex);
-
-                    contentResolver.openInputStream(uri)?.let { inputStream: InputStream ->
-
-                        var chunkcount = (fileSize / chunksize)
-                        val lastchunksize = (fileSize % chunksize).toInt();
-                        if (lastchunksize != 0) {
-                            chunkcount ++;
-                        }
-                        val fileHeader = FileHeader(
-                            type = "header",
-                            filename = fileName,
-                            filetype = "",
-                            filesize = fileSize,
-                            chunksize = chunksize,
-                            lastchunksize = lastchunksize,
-                            chunkcount = chunkcount
-                        )
-
-                        inputStream.close();
-                    }
-                }
-            } ?: run {
-                println("Failed to open cursor")
-                return
-            }
-        }
- */

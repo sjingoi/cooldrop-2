@@ -15,6 +15,11 @@ export enum PeerConnectionEvents {
     FILE_PROGRESS = "file-progress"
 }
 
+interface PeerMessage {
+    type: string,
+    data: string
+}
+
 export class PeerConnection extends Peer { //extends typedEventTarget {
 
     protected rtc_connection: RTCPeerConnection;
@@ -164,6 +169,14 @@ export class FilePeerConnection extends PeerConnection {
         this.dispatchEvent(new CustomEvent(PeerConnectionEvents.FILE_PROGRESS, { detail: { progress: progress } }));
     }
 
+    private sendMessage(message: PeerMessage) {
+        if (this.rtc_datachannel !== undefined) { 
+            this.rtc_datachannel.send(JSON.stringify(message))
+        } else {
+            console.error("Tried to send message but datachannel is not initialized.");
+        }
+    }
+
     private handleMessage(message: any) {
     
         if (typeof(message) !== "string") {
@@ -176,12 +189,13 @@ export class FilePeerConnection extends PeerConnection {
 
             this.onProgress(this.current_file.getProgress());
 
-            if (this.rtc_datachannel !== undefined) {
-                this.rtc_datachannel.send(JSON.stringify({
-                    type: 'progress',
-                    progress: this.current_file.getProgress()
-                }));
+
+            let peerMessage: PeerMessage = {
+                type: 'progress',
+                data: this.current_file.getProgress().toString()
             }
+            this.sendMessage(peerMessage);
+            
             
 
             if (this.current_file.getProgress() == 1) {
@@ -189,18 +203,18 @@ export class FilePeerConnection extends PeerConnection {
                 this.current_file = null;
             }
         } else {
-            var msg: any = JSON.parse(message)
+            var msg: PeerMessage = JSON.parse(message)
     
             switch (msg.type) {
                 case 'text':
-                    console.log("Recieved message: ", msg.text);
+                    console.log("Recieved message: ", msg.data);
                     break;
                 case 'header':
-                    let header: FileHeader = msg;
+                    let header: FileHeader = JSON.parse(msg.data);
                     this.current_file = new FileData(header);
                     break;
                 case 'progress':
-                    this.onProgress(msg.progress);
+                    this.onProgress(Number(msg.data));
                     break;
                 default:
                     console.log('unknown message type: ' + msg.type);
@@ -210,21 +224,18 @@ export class FilePeerConnection extends PeerConnection {
     }
 
     private sendHeader(file: File) {
-        if (this.rtc_datachannel === undefined) {
-            console.error("Tried to send header but datachannel is not initialized.");
-            return;
-        }
         console.log("Sending header");
-        const numChunks = Math.ceil(file.size / this.chunk_size);
-        this.rtc_datachannel.send(JSON.stringify({
-            type: 'header',
+        let header: FileHeader = {
             filename: file.name,
             filetype: file.type,
             filesize: file.size,
             chunksize: this.chunk_size,
-            lastchunksize: (file.size % this.chunk_size),
-            chunkcount: numChunks
-        }))
+        }
+        let message: PeerMessage = {
+            type: 'header',
+            data: JSON.stringify(header)
+        }
+        this.sendMessage(message);
     }
 
     private sendFileData(file: File, chunk_size: number = this.chunk_size, offset: number = 0) {

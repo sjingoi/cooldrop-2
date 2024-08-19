@@ -2,6 +2,7 @@ package com.example.cooldrop
 
 import com.example.cooldrop.filetransfer.PeerInfo
 import io.ktor.util.moveToByteArray
+import kotlinx.serialization.Serializable
 import org.webrtc.DataChannel
 import org.webrtc.IceCandidate
 import org.webrtc.MediaConstraints
@@ -12,6 +13,12 @@ import org.webrtc.PeerConnectionFactory
 import org.webrtc.SdpObserver
 import org.webrtc.SessionDescription
 import java.nio.ByteBuffer
+
+@Serializable
+data class PeerMessage(
+    val type: String,
+    val data: String,
+)
 
 val iceServers: List<IceServer> = listOf(PeerConnection
     .IceServer.builder("stun:stun1.l.google.com:19302").createIceServer())
@@ -44,6 +51,7 @@ class P2PConnection (
 
     override fun sendData(byteArray: ByteArray) : Boolean {
         val bytes = ByteBuffer.wrap(byteArray)
+        println(byteArray.size)
         return dataChannel?.send(DataChannel.Buffer(bytes, true)) ?: false
     }
 

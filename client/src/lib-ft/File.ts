@@ -1,11 +1,8 @@
 export interface FileHeader {
-    type: 'header',
     filename: string,
     filetype: string,
     filesize: number,
     chunksize: number,
-    lastchunksize: number,
-    chunkcount: number
 }
 
 export class FileData {
@@ -24,12 +21,14 @@ export class FileData {
         this.filesize = fileheader.filesize;
         this.filetype = fileheader.filetype;
         this.chunksize = fileheader.chunksize;
-        this.lastchunksize = fileheader.lastchunksize;
-        this.chunkcount = fileheader.chunkcount;
+        this.lastchunksize = this.filesize % this.chunksize;
+        this.chunkcount = Math.ceil(this.filesize / this.chunksize);
     }
 
     public addChunk(chunk: any) {
         this.data.push(chunk);
+        console.log("Array Length: " + this.data.length)
+        console.log("Chunk count " + this.chunkcount)
     }
 
     public getProgress() : number {
