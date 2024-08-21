@@ -167,7 +167,11 @@ class P2PConnection (
 
         override fun onMessage(buffer: DataChannel.Buffer?) {
             buffer?.data?.moveToByteArray()?.let {
-                dataObserver.onReceiveData(it)
+                if (buffer.binary) {
+                    dataObserver.onReceiveData(it)
+                } else {
+                    dataObserver.onReceiveText(String(it))
+                }
             }
         }
 

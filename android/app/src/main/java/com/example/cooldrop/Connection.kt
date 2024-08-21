@@ -20,4 +20,5 @@ interface DataConnection : Connection {
 
 interface DataConnectionObserver {
     fun onReceiveData(byteArray: ByteArray)
+    fun onReceiveText(string: String)
 }
