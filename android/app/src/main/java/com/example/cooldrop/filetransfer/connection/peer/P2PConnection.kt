@@ -16,7 +16,7 @@ import org.webrtc.SessionDescription
 import java.nio.ByteBuffer
 
 
-class P2PConnection (
+class P2PConnection(
     protected val signallingServer: SignallingServer,
     protected val observer: ConnectionObserver,
     protected val dataObserver: DataConnectionObserver,
@@ -26,8 +26,10 @@ class P2PConnection (
 
 
     companion object {
-        val ICE_SERVERS: List<IceServer> = listOf(PeerConnection
-            .IceServer.builder("stun:stun1.l.google.com:19302").createIceServer())
+        val ICE_SERVERS: List<IceServer> = listOf(
+            PeerConnection
+                .IceServer.builder("stun:stun1.l.google.com:19302").createIceServer()
+        )
     }
 
     protected lateinit var rtcConnection: PeerConnection;
@@ -41,14 +43,14 @@ class P2PConnection (
         peerConnectionFactory: PeerConnectionFactory,
         peerInfo: PeerInfo,
         remoteDescription: SessionDescription?,
-        ) : this(signallingServer, observer, dataObserver, peerInfo, remoteDescription) {
+    ) : this(signallingServer, observer, dataObserver, peerInfo, remoteDescription) {
 
         peerConnectionFactory.createPeerConnection(ICE_SERVERS, peerConnectionObserver)?.let {
             rtcConnection = it
         }
     }
 
-    override fun sendData(byteArray: ByteArray) : Boolean {
+    override fun sendData(byteArray: ByteArray): Boolean {
         val bytes = ByteBuffer.wrap(byteArray)
         println(byteArray.size)
         return dataChannel?.send(DataChannel.Buffer(bytes, true)) ?: false
@@ -71,7 +73,7 @@ class P2PConnection (
         }
     }
 
-    override fun closeConnection () {
+    override fun closeConnection() {
         signallingServer.removeObserver(signallingServerObserver)
         dataChannel?.close()
     }
@@ -85,9 +87,11 @@ class P2PConnection (
                     SessionDescription.Type.OFFER -> {
                         signallingServer.sendSDPOffer(sdp, peerInfo)
                     }
+
                     SessionDescription.Type.ANSWER -> {
                         signallingServer.sendSDPAnswer(sdp, peerInfo)
                     }
+
                     SessionDescription.Type.PRANSWER -> {}
                     SessionDescription.Type.ROLLBACK -> {}
                     null -> {}
@@ -100,8 +104,13 @@ class P2PConnection (
             println("SDP set successfully!")
         }
 
-        override fun onCreateFailure(p0: String?) { error("Not implemented") }
-        override fun onSetFailure(p0: String?) { error("Not implemented") }
+        override fun onCreateFailure(p0: String?) {
+            error("Not implemented")
+        }
+
+        override fun onSetFailure(p0: String?) {
+            error("Not implemented")
+        }
     }
 
     private val peerConnectionObserver = object : PeerConnection.Observer {
@@ -137,10 +146,21 @@ class P2PConnection (
             println("Renegotiation needed")
         }
 
-        override fun onIceConnectionReceivingChange(p0: Boolean) { println ("onIceConnectionReceivingChange") }
-        override fun onIceCandidatesRemoved(p0: Array<out IceCandidate>?) { println("onIceConnectionReceivingChange") }
-        override fun onAddStream(p0: MediaStream?) { println("onAddStream") }
-        override fun onRemoveStream(p0: MediaStream?) { println("onRemoveStream") }
+        override fun onIceConnectionReceivingChange(p0: Boolean) {
+            println("onIceConnectionReceivingChange")
+        }
+
+        override fun onIceCandidatesRemoved(p0: Array<out IceCandidate>?) {
+            println("onIceConnectionReceivingChange")
+        }
+
+        override fun onAddStream(p0: MediaStream?) {
+            println("onAddStream")
+        }
+
+        override fun onRemoveStream(p0: MediaStream?) {
+            println("onRemoveStream")
+        }
     }
 
     private val signallingServerObserver = object : SignallingServerObserver {
@@ -148,7 +168,7 @@ class P2PConnection (
         override fun onSDPAnswer(sessionDescription: SessionDescription, peerInfo: PeerInfo) {
             if (peerInfo.publicUuid != this@P2PConnection.peerInfo.publicUuid)
                 return
-            rtcConnection.setRemoteDescription(sdpObserver ,sessionDescription)
+            rtcConnection.setRemoteDescription(sdpObserver, sessionDescription)
         }
 
         override fun onIceCandidate(iceCandidate: IceCandidate, peerInfo: PeerInfo) {
@@ -160,9 +180,9 @@ class P2PConnection (
 
     private val dataChannelObserver = object : DataChannel.Observer {
 
-        override fun onBufferedAmountChange(previousAmount: Long) { }
+        override fun onBufferedAmountChange(previousAmount: Long) {}
 
-        override fun onStateChange() { }
+        override fun onStateChange() {}
 
         override fun onMessage(buffer: DataChannel.Buffer?) {
             buffer?.data?.moveToByteArray()?.let {

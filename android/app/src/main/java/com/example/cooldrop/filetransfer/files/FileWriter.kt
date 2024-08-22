@@ -2,7 +2,7 @@ package com.example.cooldrop.filetransfer.files
 
 import java.io.OutputStream
 
-class FileWriter (
+class FileWriter(
     private val outputStreamWriter: OutputStream,
     private val fileHeader: FileHeader
 ) {

@@ -16,14 +16,17 @@ import com.example.cooldrop.ui.theme.CooldropTheme
 
 @Composable
 fun TitleBar(modifier: Modifier = Modifier, content: @Composable () -> Unit = {}) {
-    Column(modifier = modifier
-        .fillMaxWidth()
-        .background(MaterialTheme.colorScheme.background)
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.background)
     ) {
-        Row(modifier = Modifier.padding(horizontal = 16.dp)
-            .height(56.dp),
+        Row(
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .height(56.dp),
             verticalAlignment = Alignment.CenterVertically,
-            ) {
+        ) {
             content()
         }
 //        Divider(color = MaterialTheme.colorScheme.onSurfaceVariant, thickness = 1.5.dp)

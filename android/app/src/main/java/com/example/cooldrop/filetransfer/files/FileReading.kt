@@ -4,7 +4,6 @@ import android.content.ContentResolver
 import android.net.Uri
 import android.provider.OpenableColumns
 import kotlinx.coroutines.delay
-import kotlinx.serialization.Serializable
 import java.io.InputStream
 
 const val CHUNK_SIZE: Int = 1024 * 64;
@@ -14,7 +13,12 @@ val projection = arrayOf(
     OpenableColumns.SIZE,
 )
 
-suspend fun readFile (uri: Uri, contentResolver: ContentResolver, onHeader: (header: FileHeader) -> Unit, onChunk: (chunk: ByteArray) -> Boolean): Boolean {
+suspend fun readFile(
+    uri: Uri,
+    contentResolver: ContentResolver,
+    onHeader: (header: FileHeader) -> Unit,
+    onChunk: (chunk: ByteArray) -> Boolean
+): Boolean {
     val cursor = contentResolver.query(uri, projection, null, null, null) ?: error("Cursor null");
     if (!cursor.moveToFirst()) {
         error("Could not read file properties")

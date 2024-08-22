@@ -17,7 +17,6 @@ fun FileTransferScreen(
 ) {
 
 
-
     Column(modifier = modifier) {
         TitleBar {
             Text(text = "Cooldrop", style = MaterialTheme.typography.titleLarge)
@@ -25,7 +24,7 @@ fun FileTransferScreen(
         InfoPanel(user = fileTransferViewModel.user, onClick = {})
         PeerList(
             list = fileTransferViewModel.peers.map { peer -> peer.peerInfo },
-            onPeerClicked = {peer ->
+            onPeerClicked = { peer ->
                 fileTransferViewModel.onPeerClicked(peer)
             },
             onPeerUris = { peer, uris ->

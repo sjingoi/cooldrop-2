@@ -29,9 +29,12 @@ fun PeerList(
     ) {
         items(
             items = list,
-            key = {peer -> peer.publicUuid}
-        ) {peer ->
-            PeerItem(peer = peer, onClick = { onPeerClicked(peer) }, onUris = { uris -> onPeerUris(peer, uris)})
+            key = { peer -> peer.publicUuid }
+        ) { peer ->
+            PeerItem(
+                peer = peer,
+                onClick = { onPeerClicked(peer) },
+                onUris = { uris -> onPeerUris(peer, uris) })
         }
     }
 }

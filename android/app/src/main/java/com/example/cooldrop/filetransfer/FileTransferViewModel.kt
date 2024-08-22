@@ -42,10 +42,11 @@ class FileTransferViewModel(application: Application) : AndroidViewModel(applica
     private val io = CooldropIOClient(
         "ws://192.168.0.60:8080",
         _peers,
-        CooldropIOObserver (this, application)
+        CooldropIOObserver(this, application)
     )
 
-    private class CooldropIOObserver (val vm: FileTransferViewModel, val application: Application) : CooldropIOClient.Observer {
+    private class CooldropIOObserver(val vm: FileTransferViewModel, val application: Application) :
+        CooldropIOClient.Observer {
 
         val observer = object : ConnectionObserver {
             override fun onOpen() {
@@ -85,20 +86,27 @@ class FileTransferViewModel(application: Application) : AndroidViewModel(applica
                             val contentResolver = application.applicationContext.contentResolver
                             val contentValues = ContentValues().apply {
                                 put(MediaStore.Downloads.DISPLAY_NAME, fileHeader.filename)
-                                put(MediaStore.Downloads.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
+                                put(
+                                    MediaStore.Downloads.RELATIVE_PATH,
+                                    Environment.DIRECTORY_DOWNLOADS
+                                )
                             }
-                            val uri = contentResolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues)
+                            val uri = contentResolver.insert(
+                                MediaStore.Downloads.EXTERNAL_CONTENT_URI,
+                                contentValues
+                            )
                             if (uri == null) {
                                 println("Unable to get uri for file writing")
                                 return
                             }
-                            val outputStream = contentResolver.openOutputStream(uri, )
+                            val outputStream = contentResolver.openOutputStream(uri)
                             if (outputStream == null) {
                                 println("Unable to open outputstream")
                                 return
                             }
                             vm.currentFile = FileWriter(outputStream, fileHeader)
                         }
+
                         else -> {
                             println("Unknown message type: ${message.type}")
                         }
@@ -133,7 +141,10 @@ class FileTransferViewModel(application: Application) : AndroidViewModel(applica
     }
 
     init {
-        PeerConnectionFactory.initialize(InitializationOptions.builder(application.applicationContext).createInitializationOptions())
+        PeerConnectionFactory.initialize(
+            InitializationOptions.builder(application.applicationContext)
+                .createInitializationOptions()
+        )
     }
 
     fun connectToServer() {
@@ -181,7 +192,7 @@ class FileTransferViewModel(application: Application) : AndroidViewModel(applica
         connection.sendText(Json.encodeToString(message))
     }
 
-    private fun onChunk(connection: DataConnection, byteArray: ByteArray) : Boolean {
+    private fun onChunk(connection: DataConnection, byteArray: ByteArray): Boolean {
         if (!connection.sendData(byteArray)) {
             println("SEND FAIL!!!!!!!!!!!!!!!!")
             return false

@@ -20,14 +20,21 @@ data class SerializableIce(
     val usernameFragment: String? = null
 )
 
-fun decodeIce(iceString: String): IceCandidate  {
+fun decodeIce(iceString: String): IceCandidate {
     val serializableIce = Json.decodeFromString<SerializableIce>(iceString)
-    return IceCandidate(serializableIce.sdpMid, serializableIce.sdpMLineIndex, serializableIce.candidate);
+    return IceCandidate(
+        serializableIce.sdpMid,
+        serializableIce.sdpMLineIndex,
+        serializableIce.candidate
+    );
 }
 
 fun decodeSdp(sdpString: String): SessionDescription {
     val serializableSDP = Json.decodeFromString<SerializableSDP>(sdpString)
-    return SessionDescription(SessionDescription.Type.fromCanonicalForm(serializableSDP.type), serializableSDP.sdp)
+    return SessionDescription(
+        SessionDescription.Type.fromCanonicalForm(serializableSDP.type),
+        serializableSDP.sdp
+    )
 }
 
 fun encodeIce(ice: IceCandidate): String {

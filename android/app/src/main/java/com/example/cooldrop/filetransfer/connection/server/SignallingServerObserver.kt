@@ -6,7 +6,7 @@ import org.webrtc.SessionDescription
 
 
 interface SignallingServerObserver {
-    fun onSDPOffer (sessionDescription: SessionDescription, peerInfo: PeerInfo) {}
-    fun onSDPAnswer (sessionDescription: SessionDescription, peerInfo: PeerInfo)  {}
-    fun onIceCandidate (iceCandidate: IceCandidate, peerInfo: PeerInfo) {}
+    fun onSDPOffer(sessionDescription: SessionDescription, peerInfo: PeerInfo) {}
+    fun onSDPAnswer(sessionDescription: SessionDescription, peerInfo: PeerInfo) {}
+    fun onIceCandidate(iceCandidate: IceCandidate, peerInfo: PeerInfo) {}
 }

@@ -34,9 +34,10 @@ fun PeerItem(
     modifier: Modifier = Modifier
 ) {
 
-    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { uris ->
-        onUris(uris);
-    }
+    val launcher =
+        rememberLauncherForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { uris ->
+            onUris(uris);
+        }
 
     Surface(
         shape = MaterialTheme.shapes.medium,
