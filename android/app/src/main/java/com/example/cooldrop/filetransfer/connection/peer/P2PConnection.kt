@@ -1,8 +1,9 @@
-package com.example.cooldrop
+package com.example.cooldrop.filetransfer.connection.peer
 
 import com.example.cooldrop.filetransfer.PeerInfo
+import com.example.cooldrop.filetransfer.connection.server.SignallingServer
+import com.example.cooldrop.filetransfer.connection.server.SignallingServerObserver
 import io.ktor.util.moveToByteArray
-import kotlinx.serialization.Serializable
 import org.webrtc.DataChannel
 import org.webrtc.IceCandidate
 import org.webrtc.MediaConstraints
@@ -14,14 +15,6 @@ import org.webrtc.SdpObserver
 import org.webrtc.SessionDescription
 import java.nio.ByteBuffer
 
-@Serializable
-data class PeerMessage(
-    val type: String,
-    val data: String,
-)
-
-val iceServers: List<IceServer> = listOf(PeerConnection
-    .IceServer.builder("stun:stun1.l.google.com:19302").createIceServer())
 
 class P2PConnection (
     protected val signallingServer: SignallingServer,
@@ -30,6 +23,12 @@ class P2PConnection (
     val peerInfo: PeerInfo,
     val remoteDescription: SessionDescription?,
 ) : DataConnection {
+
+
+    companion object {
+        val ICE_SERVERS: List<IceServer> = listOf(PeerConnection
+            .IceServer.builder("stun:stun1.l.google.com:19302").createIceServer())
+    }
 
     protected lateinit var rtcConnection: PeerConnection;
     private var dataChannel: DataChannel? = null;
@@ -44,7 +43,7 @@ class P2PConnection (
         remoteDescription: SessionDescription?,
         ) : this(signallingServer, observer, dataObserver, peerInfo, remoteDescription) {
 
-        peerConnectionFactory.createPeerConnection(iceServers, peerConnectionObserver)?.let {
+        peerConnectionFactory.createPeerConnection(ICE_SERVERS, peerConnectionObserver)?.let {
             rtcConnection = it
         }
     }
@@ -177,10 +176,4 @@ class P2PConnection (
 
     }
 
-}
-
-interface P2PConnectionObserver {
-    fun onOpen();
-    fun onClose();
-    fun onError();
 }

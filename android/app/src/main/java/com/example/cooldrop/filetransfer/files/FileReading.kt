@@ -1,4 +1,4 @@
-package com.example.cooldrop
+package com.example.cooldrop.filetransfer.files
 
 import android.content.ContentResolver
 import android.net.Uri
@@ -6,14 +6,6 @@ import android.provider.OpenableColumns
 import kotlinx.coroutines.delay
 import kotlinx.serialization.Serializable
 import java.io.InputStream
-
-@Serializable
-data class FileHeader (
-    val filename: String,
-    val filetype: String,
-    val filesize: Long,
-    val chunksize: Int,
-)
 
 const val CHUNK_SIZE: Int = 1024 * 64;
 

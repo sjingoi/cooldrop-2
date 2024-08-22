@@ -1,8 +1,16 @@
-package com.example.cooldrop
+package com.example.cooldrop.filetransfer.connection.server
 
 import androidx.compose.runtime.mutableStateListOf
+import com.example.cooldrop.User
 import com.example.cooldrop.filetransfer.PeerInfo
-import kotlinx.serialization.Serializable
+import com.example.cooldrop.filetransfer.connection.decodeIce
+import com.example.cooldrop.filetransfer.connection.decodeSdp
+import com.example.cooldrop.filetransfer.connection.encodeIce
+import com.example.cooldrop.filetransfer.connection.encodeSdp
+import com.example.cooldrop.filetransfer.connection.peer.P2PConnection
+import com.example.cooldrop.filetransfer.connection.server.messagedata.IceCandidateMessageData
+import com.example.cooldrop.filetransfer.connection.server.messagedata.PeerInfoMessageData
+import com.example.cooldrop.filetransfer.connection.server.messagedata.SDPMessageData
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
@@ -14,47 +22,6 @@ import okio.ByteString
 import org.webrtc.IceCandidate
 import org.webrtc.SessionDescription
 import java.util.UUID
-
-@Serializable
-data class PeerInfoMessageData(
-    val peer_uuid: String,
-    val peer_name: String
-)
-
-@Serializable
-data class SDPMessageData(
-    val origin_uuid: String,
-    val origin_name: String,
-    val recipient_uuid: String,
-    val sdp: String
-)
-
-@Serializable
-data class IceCandidateMessageData(
-    val origin_uuid: String,
-    val recipient_uuid: String,
-    val ice: String
-)
-
-@Serializable
-data class CooldropIOMessage(val type: String, val data: String)
-
-object MessageType {
-    const val TEST = "test"
-    const val PRIVATE_UUID = "private-uuid"
-    const val PUBLIC_UUID = "public-uuid"
-    const val PRIVATE_UUID_REQ = "private-uuid-req"
-    const val SDP_OFFER = "sdp-offer"
-    const val SDP_ANSWER = "sdp-answer"
-    const val SDP_OFFER_REQ = "sdp-offer-req"
-    const val ICE_CANDIDATE = "ice-candidate"
-    const val PEER_DISCONNECT = "peer-disconnect"
-}
-
-object ConnectionStatus {
-    const val CONNECTED = "connected"
-    const val DISCONNECTED = "disconnected"
-}
 
 class CooldropIOClient (
     private val url: String,
@@ -73,6 +40,18 @@ class CooldropIOClient (
     private var reconnectOnClose: Boolean = true
 
     private lateinit var webSocket: WebSocket
+
+    private object MessageType {
+        const val TEST = "test"
+        const val PRIVATE_UUID = "private-uuid"
+        const val PUBLIC_UUID = "public-uuid"
+        const val PRIVATE_UUID_REQ = "private-uuid-req"
+        const val SDP_OFFER = "sdp-offer"
+        const val SDP_ANSWER = "sdp-answer"
+        const val SDP_OFFER_REQ = "sdp-offer-req"
+        const val ICE_CANDIDATE = "ice-candidate"
+        const val PEER_DISCONNECT = "peer-disconnect"
+    }
 
     private fun initSocket() {
         client = OkHttpClient()

@@ -1,4 +1,4 @@
-package com.example.cooldrop
+package com.example.cooldrop.filetransfer.connection
 
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
