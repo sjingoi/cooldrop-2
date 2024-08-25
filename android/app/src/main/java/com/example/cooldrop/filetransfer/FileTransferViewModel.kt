@@ -12,7 +12,7 @@ import com.example.cooldrop.User
 import com.example.cooldrop.filetransfer.connection.peer.ConnectionObserver
 import com.example.cooldrop.filetransfer.connection.peer.DataConnection
 import com.example.cooldrop.filetransfer.connection.peer.DataConnectionObserver
-import com.example.cooldrop.filetransfer.connection.peer.P2PConnection
+import com.example.cooldrop.filetransfer.connection.peer.P2PConnectionOld
 import com.example.cooldrop.filetransfer.connection.peer.PeerMessage
 import com.example.cooldrop.filetransfer.connection.server.CooldropIOClient
 import com.example.cooldrop.filetransfer.files.FileHeader
@@ -31,8 +31,8 @@ class FileTransferViewModel(application: Application) : AndroidViewModel(applica
     val user: User
         get() = io.user
 
-    private var _peers: MutableList<P2PConnection> = mutableStateListOf()
-    val peers: List<P2PConnection>
+    private var _peers: MutableList<P2PConnectionOld> = mutableStateListOf()
+    val peers: List<P2PConnectionOld>
         get() = _peers
 
     var currentFile: FileWriter? = null
@@ -118,7 +118,7 @@ class FileTransferViewModel(application: Application) : AndroidViewModel(applica
         }
 
         override fun onPeerJoin(peer: PeerInfo, sessionDescription: SessionDescription?) {
-            val newPeer = P2PConnection(
+            val newPeer = P2PConnectionOld(
                 vm.io,
                 observer,
                 dataObserver,
@@ -156,7 +156,7 @@ class FileTransferViewModel(application: Application) : AndroidViewModel(applica
         _peers.remove(peerToRemove)
     }
 
-    fun addPeer(peer: P2PConnection) {
+    fun addPeer(peer: P2PConnectionOld) {
         _peers.add(peer)
     }
 

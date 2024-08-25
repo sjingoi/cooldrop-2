@@ -7,7 +7,7 @@ import com.example.cooldrop.filetransfer.connection.decodeIce
 import com.example.cooldrop.filetransfer.connection.decodeSdp
 import com.example.cooldrop.filetransfer.connection.encodeIce
 import com.example.cooldrop.filetransfer.connection.encodeSdp
-import com.example.cooldrop.filetransfer.connection.peer.P2PConnection
+import com.example.cooldrop.filetransfer.connection.peer.P2PConnectionOld
 import com.example.cooldrop.filetransfer.connection.server.messagedata.IceCandidateMessageData
 import com.example.cooldrop.filetransfer.connection.server.messagedata.PeerInfoMessageData
 import com.example.cooldrop.filetransfer.connection.server.messagedata.SDPMessageData
@@ -25,7 +25,7 @@ import java.util.UUID
 
 class CooldropIOClient(
     private val url: String,
-    private var peers: MutableList<P2PConnection> = mutableStateListOf(),
+    private var peers: MutableList<P2PConnectionOld> = mutableStateListOf(),
     private val observer: Observer
 ) : SignallingServer {
 
