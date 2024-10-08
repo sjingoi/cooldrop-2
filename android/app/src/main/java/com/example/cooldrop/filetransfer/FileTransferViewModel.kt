@@ -9,12 +9,10 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.cooldrop.User
-import com.example.cooldrop.filetransfer.connection.peer.ConnectionObserver
 import com.example.cooldrop.filetransfer.connection.peer.DataConnection
-import com.example.cooldrop.filetransfer.connection.peer.DataConnectionObserver
 import com.example.cooldrop.filetransfer.connection.peer.P2PConnectionOld
 import com.example.cooldrop.filetransfer.connection.peer.PeerMessage
-import com.example.cooldrop.filetransfer.connection.server.CooldropIOClient
+import com.example.cooldrop.filetransfer.connection.server.CooldropServer
 import com.example.cooldrop.filetransfer.files.FileHeader
 import com.example.cooldrop.filetransfer.files.FileWriter
 import com.example.cooldrop.filetransfer.files.readFile
@@ -39,14 +37,14 @@ class FileTransferViewModel(application: Application) : AndroidViewModel(applica
 
     val launchedEffectKey = 0
 
-    private val io = CooldropIOClient(
+    private val io = CooldropServer(
         "ws://192.168.0.60:8080",
         _peers,
         CooldropIOObserver(this, application)
     )
 
     private class CooldropIOObserver(val vm: FileTransferViewModel, val application: Application) :
-        CooldropIOClient.Observer {
+        CooldropServer.Observer {
 
         val observer = object : ConnectionObserver {
             override fun onOpen() {

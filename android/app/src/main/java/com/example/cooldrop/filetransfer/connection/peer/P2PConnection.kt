@@ -4,7 +4,7 @@ import com.example.cooldrop.filetransfer.PeerInfo
 
 abstract class P2PConnection (
     val peerInfo: PeerInfo,
-    private val observer: Observer,
+    protected open val observer: Observer,
 ) {
 
     abstract val connected: Boolean
@@ -16,6 +16,6 @@ abstract class P2PConnection (
     interface Observer {
         fun onOpen();
         fun onClose();
-        fun onError();
+        fun onError(string: String);
     }
 }
