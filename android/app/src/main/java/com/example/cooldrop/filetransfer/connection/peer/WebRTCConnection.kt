@@ -1,6 +1,5 @@
 package com.example.cooldrop.filetransfer.connection.peer
 
-import com.example.cooldrop.filetransfer.PeerInfo
 import org.webrtc.DataChannel
 import org.webrtc.IceCandidate
 import org.webrtc.MediaConstraints
@@ -11,23 +10,23 @@ import org.webrtc.SdpObserver
 import org.webrtc.SessionDescription
 
 abstract class WebRTCConnection(
-    peerInfo: PeerInfo,
-    private val remoteDescription: SessionDescription?,
+    peerConnectionFactory: PeerConnectionFactory,
     observer: Observer,
-    private val peerConnectionFactory: PeerConnectionFactory,
-) : P2PConnection(peerInfo, observer) {
+) : P2PConnection {
 
+    enum class RTCConnectionType {
+        UNINITIALIZED, LOCAL, REMOTE
+    }
+
+    override var connected = false;
     protected lateinit var rtcConnection: PeerConnection;
-
-    protected val remoteConnection: Boolean = remoteDescription == null;
-
+    protected var connectionType = RTCConnectionType.UNINITIALIZED
     companion object {
         val ICE_SERVERS: List<PeerConnection.IceServer> = listOf(
             PeerConnection
                 .IceServer.builder("stun:stun1.l.google.com:19302").createIceServer()
         )
     }
-
     private val peerConnectionObserver = object : PeerConnection.Observer {
         override fun onIceCandidate(ice: IceCandidate?) {
             println("ICE CANDIDATE")
@@ -39,18 +38,18 @@ abstract class WebRTCConnection(
         override fun onDataChannel(dc: DataChannel?) {
             println("DATACHANNEL")
             if (dc != null) {
-                this.onDataChannel(dc)
+                onDataChannelCreated(dc)
             }
         }
 
         override fun onSignalingChange(p0: PeerConnection.SignalingState?) {
-            println("Signalling state changed: ${p0}")
+            println("Signalling state changed: $p0")
         }
 
         override fun onIceConnectionChange(state: PeerConnection.IceConnectionState?) {
             when (state) {
                 PeerConnection.IceConnectionState.CONNECTED -> {
-//                    observer.onOpen()
+                    observer.onOpen()
                     println("Ice connected")
                 }
                 else -> {}
@@ -59,7 +58,7 @@ abstract class WebRTCConnection(
         }
 
         override fun onIceGatheringChange(p0: PeerConnection.IceGatheringState?) {
-            println("Ice gathering changed: ${p0}")
+            println("Ice gathering changed: $p0")
         }
 
         override fun onRenegotiationNeeded() {
@@ -75,14 +74,13 @@ abstract class WebRTCConnection(
         }
 
         override fun onAddStream(stream: MediaStream) {
-            onAddStream(stream)
+            onStreamAdded(stream)
         }
 
         override fun onRemoveStream(stream: MediaStream) {
-            onAddStream(stream)
+            onStreamRemoved(stream)
         }
     }
-
     private val sdpObserver = object : SdpObserver {
         override fun onCreateSuccess(sdp: SessionDescription?) {
             println("CREATED SDP")
@@ -116,38 +114,42 @@ abstract class WebRTCConnection(
     }
 
     init {
-        peerConnectionFactory.createPeerConnection(P2PConnectionOld.ICE_SERVERS, peerConnectionObserver)?.let {
+        peerConnectionFactory.createPeerConnection(ICE_SERVERS, peerConnectionObserver)?.let {
             rtcConnection = it
         }
     }
 
-    override fun openConnection() {
-        if (remoteDescription == null) {
-            rtcConnection.createOffer(sdpObserver, MediaConstraints())
-        } else {
-            rtcConnection.setRemoteDescription(sdpObserver, remoteDescription)
-            rtcConnection.createAnswer(sdpObserver, MediaConstraints())
-        }
+    fun startLocalConnection() {
+        assert(connectionType == RTCConnectionType.UNINITIALIZED)
+
+        connectionType = RTCConnectionType.LOCAL;
+        rtcConnection.createOffer(sdpObserver, MediaConstraints())
     }
 
-    override val connected: Boolean
-        get() = TODO("Not yet implemented")
+    fun startRemoteConnection(remoteDescription: SessionDescription) {
+        assert(connectionType == RTCConnectionType.UNINITIALIZED)
+
+        connectionType = RTCConnectionType.REMOTE;
+        rtcConnection.setRemoteDescription(sdpObserver, remoteDescription)
+        rtcConnection.createAnswer(sdpObserver, MediaConstraints())
+    }
+
+    override fun closeConnection() {
+        rtcConnection.close()
+    }
 
     fun addAnswer(sdpAnswer: SessionDescription) {
         this.rtcConnection.setLocalDescription(sdpObserver, sdpAnswer)
     }
-
     fun addIceCandidate(iceCandidate: IceCandidate) {
         this.rtcConnection.addIceCandidate(iceCandidate)
     }
 
-    protected open fun onDataChannel(dataChannel: DataChannel) { }
+    abstract fun onDataChannelCreated(dataChannel: DataChannel)
+    abstract fun onStreamAdded(mediaStream: MediaStream)
+    abstract fun onStreamRemoved(mediaStream: MediaStream)
 
-    protected open fun onAddStream(mediaStream: MediaStream) { }
-
-    protected open fun onRemoveStream(mediaStream: MediaStream) { }
-
-    public interface Observer : P2PConnection.Observer {
+    interface Observer : P2PConnection.Observer {
         fun onOffer(sdpOffer: SessionDescription)
         fun onAnswer(sdpAnswer: SessionDescription)
         fun onIceCandidate(ice: IceCandidate)

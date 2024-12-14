@@ -1,13 +1,11 @@
 package com.example.cooldrop.filetransfer.connection.server
 
-import androidx.compose.runtime.mutableStateListOf
 import com.example.cooldrop.User
 import com.example.cooldrop.filetransfer.PeerInfo
 import com.example.cooldrop.filetransfer.connection.decodeIce
 import com.example.cooldrop.filetransfer.connection.decodeSdp
 import com.example.cooldrop.filetransfer.connection.encodeIce
 import com.example.cooldrop.filetransfer.connection.encodeSdp
-import com.example.cooldrop.filetransfer.connection.peer.P2PConnectionOld
 import com.example.cooldrop.filetransfer.connection.server.messagedata.IceCandidateMessageData
 import com.example.cooldrop.filetransfer.connection.server.messagedata.PeerInfoMessageData
 import com.example.cooldrop.filetransfer.connection.server.messagedata.SDPMessageData
@@ -51,6 +49,7 @@ class CooldropServer(
         const val SDP_ANSWER = "sdp-answer"
         const val SDP_OFFER_REQ = "sdp-offer-req"
         const val ICE_CANDIDATE = "ice-candidate"
+        const val PEER_JOIN = "peer-join"
         const val PEER_DISCONNECT = "peer-disconnect"
     }
 
@@ -138,13 +137,22 @@ class CooldropServer(
                 peerServerObservers.forEach { it.onPeerLeave(disconnectedUuid) }
             }
 
+            MessageType.PEER_JOIN -> {
+                val peerJoinMsg = Json.decodeFromString<PeerInfoMessageData>(message.data)
+                val peerInfo = PeerInfo(
+                    name = peerJoinMsg.peer_name,
+                    publicUuid = UUID.fromString(peerJoinMsg.peer_uuid),
+                )
+                peerServerObservers.forEach { it.onPeerJoin(peerInfo) }
+            }
+
             MessageType.SDP_OFFER_REQ -> {
                 val peerInfoMsg = Json.decodeFromString<PeerInfoMessageData>(message.data)
                 val peerInfo = PeerInfo(
                     name = peerInfoMsg.peer_name,
                     publicUuid = UUID.fromString(peerInfoMsg.peer_uuid)
                 )
-                peerServerObservers.forEach { it.onPeerJoin(peerInfo) }
+                signallingServerObservers.forEach { it.onSDPOfferReq(peerInfo.publicUuid) }
             }
 
             MessageType.TEST -> {
@@ -173,7 +181,7 @@ class CooldropServer(
     override fun sendSDPOffer(sessionDescription: SessionDescription, peer: PeerInfo) {
         assert(sessionDescription.type == SessionDescription.Type.OFFER)
         val sdpMessageData = SDPMessageData(
-            origin_name = user.name,
+//            origin_name = user.name,
             origin_uuid = user.publicUuid.toString(),
             recipient_uuid = peer.publicUuid.toString(),
             sdp = encodeSdp(sessionDescription)
@@ -184,7 +192,7 @@ class CooldropServer(
     override fun sendSDPAnswer(sessionDescription: SessionDescription, peer: PeerInfo) {
         assert(sessionDescription.type == SessionDescription.Type.ANSWER)
         val sdpMessageData = SDPMessageData(
-            origin_name = user.name,
+//            origin_name = user.name,
             origin_uuid = user.publicUuid.toString(),
             recipient_uuid = peer.publicUuid.toString(),
             sdp = encodeSdp(sessionDescription)

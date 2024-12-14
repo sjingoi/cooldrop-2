@@ -13,6 +13,7 @@ interface SignallingServer {
     fun sendIceCandidate(iceCandidate: IceCandidate, peer: PeerInfo)
 
     interface Observer {
+        fun onSDPOfferReq(peerUuid: UUID)
         fun onSDPOffer(sessionDescription: SessionDescription, peerUuid: UUID)
         fun onSDPAnswer(sessionDescription: SessionDescription, peerUuid: UUID)
         fun onIceCandidate(iceCandidate: IceCandidate, peerUuid: UUID)

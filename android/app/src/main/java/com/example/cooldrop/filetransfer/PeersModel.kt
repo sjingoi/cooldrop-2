@@ -12,8 +12,8 @@ abstract class PeersModel (
     webRTCConnectionFactory: WebRTCConnectionFactory
 ) {
     val peers = mutableListOf<WebRTCConnection>()
+    val signallingServer: SignallingServer = CooldropServer("ws://192.168.0.60:8080")
     val connectionManager: WebRTCConnectionManager
-    val signallingServer: SignallingServer
 
     init {
         signallingServer = CooldropServer()
@@ -28,24 +28,18 @@ abstract class PeersModel (
 
     }
 
-    private class ManagerObserver : ConnectionManager.Observer<WebRTCConnection> {
-        override fun onPeerConnected(peer: WebRTCConnection) {
+    inner class ManagerObserver : ConnectionManager.Observer {
+
+    }
+
+    inner class CooldropObserver : CooldropServer.Observer {
+        override fun onOpen() {
             TODO("Not yet implemented")
         }
 
-        override fun onPeerDisconnected(peer: WebRTCConnection) {
-            TODO("Not yet implemented")
-        }
-
-        override fun onPeerJoin(peer: WebRTCConnection) {
-            TODO("Not yet implemented")
-        }
-
-        override fun onPeerLeave(peer: WebRTCConnection) {
+        override fun onClose() {
             TODO("Not yet implemented")
         }
 
     }
-
-    private class
 }

@@ -1,24 +1,23 @@
 package com.example.cooldrop.filetransfer.connection
 
-import com.example.cooldrop.filetransfer.connection.peer.P2PConnection
+import com.example.cooldrop.filetransfer.PeerClass
 
-abstract class ConnectionManager<T : P2PConnection>(
-    protected val observer: Observer<T>
+abstract class ConnectionManager(
+    protected val observer: Observer
 ) {
 
-    protected abstract val disconnectedPeers: MutableSet<T>
-
-    protected abstract val connectedPeers: MutableSet<T>
+    protected abstract val disconnectedPeers: MutableSet<PeerClass>
+    protected abstract val connectedPeers: MutableSet<PeerClass>
 
     fun closeAllPeers() {
-        disconnectedPeers.forEach { it.closeConnection() }
-        connectedPeers.forEach { it.closeConnection() }
+        disconnectedPeers.forEach { it.connection?.closeConnection() }
+        connectedPeers.forEach { it.connection?.closeConnection() }
     }
 
-    interface Observer<T: P2PConnection> {
-        fun onPeerConnected(peer: T)
-        fun onPeerDisconnected(peer: T)
-        fun onPeerJoin(peer: T)
-        fun onPeerLeave(peer: T)
+    interface Observer {
+        fun onPeerConnected(peer: PeerClass)
+        fun onPeerDisconnected(peer: PeerClass)
+        fun onPeerJoin(peer: PeerClass)
+        fun onPeerLeave(peer: PeerClass)
     }
 }

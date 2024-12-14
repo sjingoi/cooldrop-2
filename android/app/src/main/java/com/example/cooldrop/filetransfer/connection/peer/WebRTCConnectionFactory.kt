@@ -1,9 +1,7 @@
 package com.example.cooldrop.filetransfer.connection.peer
 
 import android.content.Context
-import com.example.cooldrop.filetransfer.PeerInfo
 import org.webrtc.PeerConnectionFactory
-import org.webrtc.SessionDescription
 
 class WebRTCConnectionFactory(applicationContext: Context) {
 
@@ -17,13 +15,9 @@ class WebRTCConnectionFactory(applicationContext: Context) {
     }
 
     fun createDataConnection(
-        peerInfo: PeerInfo,
-        observer: WebRTCConnection.Observer,
-        remoteDescription: SessionDescription? = null
+        observer: WebRTCConnection.Observer
     ): WebRTCDataConnection {
         return WebRTCDataConnection(
-            peerInfo,
-            remoteDescription,
             observer,
             peerConnectionFactory,
         )
